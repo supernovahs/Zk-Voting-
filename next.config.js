@@ -1,31 +1,13 @@
 /** @type {import('next').NextConfig} */
-
 const nextConfig = {
-  reactStrictMode: true,
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    if (!isServer) {
-      config.plugins.push(
-        new webpack.ProvidePlugin({
-          global: "global"
-        })
-      )
-
-      config.resolve.fallback = {
-        fs: false,
-        stream: false,
-        crypto: false,
-        os: false,
-        readline: false,
-        ejs: false,
-        assert: require.resolve("assert"),
-        path: false
-      }
-
-      return config
+  reactStrictMode: false,
+  webpack: function (config, options) {
+    if (!options.isServer) {
+      config.resolve.fallback.fs = false;
     }
-
-    return config
-  }
+    config.experiments = { asyncWebAssembly: true, layers: true };
+    return config;
+  },
 }
 
 module.exports = nextConfig

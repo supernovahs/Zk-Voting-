@@ -18,6 +18,7 @@ const Home: NextPage = () => {
 
   const contract = new ethers.Contract(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,abi.abi,signer);
   console.log("Contracct Instance ",contract);
+  console.log("Event in index",Event);
   return (
     <div className={styles.container}>
       
@@ -34,7 +35,7 @@ const Home: NextPage = () => {
           Setstage(3)
         }} />
       ):(
-        <ProofStep />
+        <ProofStep eve = {Event} contract  = {contract} identitycommitment = {_identity}  />
       )}
 
       </div>

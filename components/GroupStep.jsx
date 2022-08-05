@@ -21,9 +21,10 @@ export default function GroupStep({ contract, identitycommitment, onSelect }) {
     return events.map((e) => ({
       groupId: e.args[0],
       eventName: e.args[0],
-      members: 5,
+      members: members
+        .filter((m) => m.args[0].eq(e.args[0]))
+        .map((m) => m.args[1].toString()),
     }));
-    //   const a = 1;
   }
   console.log("Event call", getEvents());
 
@@ -60,6 +61,8 @@ export default function GroupStep({ contract, identitycommitment, onSelect }) {
   const joinEvent = async (e) => {};
 
   const SelectEvent = (e) => {
+    getEvents();
+    console.log("event cehck ", e);
     onSelect(e);
   };
 
@@ -134,7 +137,10 @@ export default function GroupStep({ contract, identitycommitment, onSelect }) {
                 const newproposals = proposals.map((val, index) => {
                   if (val.length < 32) {
                     console.log("Index", index, val);
-
+                    console.log(
+                      "proposal in bytes ",
+                      ethers.utils.formatBytes32String(val)
+                    );
                     return ethers.utils.formatBytes32String(val);
                   }
                   return val;
@@ -167,15 +173,15 @@ export default function GroupStep({ contract, identitycommitment, onSelect }) {
           </div>
           <div>
             {Events?.map((value, i) => {
-              console.log("value", Number(value.groupId), "index", i);
-              let name = new BigNumber(Number(value.eventName));
-              let id = new BigNumber(Number(value.groupId));
+              console.log("value", value.groupId, "index", i);
+              let name = ethers.BigNumber.from(value.eventName).toString();
+              let id = ethers.BigNumber.from(value.groupId).toString();
               return (
                 <div
                   style={{ border: "2px solid black", margin: 10, padding: 10 }}
                 >
-                  <p>EventName :{name.toFixed()}</p>
-                  <p>GroupId :{id.toFixed()}</p>
+                  <p>EventName :{name}</p>
+                  <p>GroupId :{id}</p>
                   <Button
                     onClick={() => {
                       SelectEvent(value);
@@ -190,12 +196,7 @@ export default function GroupStep({ contract, identitycommitment, onSelect }) {
                   />
                   <Button
                     onClick={async () => {
-                      let a = new BigNumber(NewVoter);
-                      console.log("id", id.toFixed(), a.toFixed());
-                      const tx = await contract.Addvoter(
-                        id.toFixed(),
-                        a.toFixed()
-                      );
+                      const tx = await contract.Addvoter(id, NewVoter);
                       console.log("tx", tx);
                     }}
                   >

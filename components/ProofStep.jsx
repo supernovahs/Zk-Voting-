@@ -6,7 +6,10 @@ import { Group } from "@semaphore-protocol/group";
 // import { generateProof } from "@semaphore-protocol/proof";
 import { Button, Input } from "antd";
 const { ethers } = require("ethers");
-const { generateProof } = require("@semaphore-protocol/proof");
+const {
+  generateProof,
+  packToSolidityProof,
+} = require("@semaphore-protocol/proof");
 export default function ProofStep({ eve, identitycommitment, contract }) {
   const [Votes, SetVotes] = useState();
   const getVotes = async () => {
@@ -15,23 +18,38 @@ export default function ProofStep({ eve, identitycommitment, contract }) {
     // );
     // return votes.map((e) => parseBytes32String(e.args[0]));
   };
+  console.log("eve", eve);
 
   const vote = async () => {
     const group = new Group();
-    console.log("members", eve.members);
+    console.log("Event data ", eve.members);
     group.addMembers(eve.members);
-    // const externalNullifier = group.root;
-    // const signal = "dfs";
-    // const fullProof = await generateProof(
+    const externalNullifier = group.root;
+    console.log("externalnullifier", externalNullifier);
+    const signal = "ts";
+    // const identity = identitycommitment.generateCommitment();
+    // console.log("identity", identity);
+    // console.log(
+    //   "identitu  commitment",
     //   identitycommitment,
+    //   "group",
     //   group,
-    //   externalNullifier,
-    //   signal,
-    //   {
-    //     zkeyFilePath: "../helpers/semaphore.zkey",
-    //     wasmFilePath: "../helpers/semaphore.wasm",
-    //   }
+    //   "ext null",
+    //   externalNullifier
     // );
+    const { proof, publicSignals } = await generateProof(
+      identitycommitment,
+      group,
+      externalNullifier,
+      signal,
+      {
+        zkeyFilePath: "/semaphore.zkey",
+        wasmFilePath: "/semaphore.wasm",
+      }
+    );
+    console.log("fullproof", proof, publicSignals);
+    const solidityProof = packToSolidityProof(proof);
+    console.log("solidityproof", solidityProof);
 
     // const rootinbignumber = await contract.getRoot(eve.groupId);
     // let a = new BigNumber(rootinbignumber);
