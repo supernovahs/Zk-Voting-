@@ -35,7 +35,7 @@ const Home: NextPage = () => {
           Setstage(3)
         }} />
       ):(
-        <ProofStep eve = {Event} contract  = {contract} identitycommitment = {_identity}  />
+        <ProofStep  signer = {signer} eve = {Event} contract  = {contract} identitycommitment = {_identity}  />
       )}
 
       </div>
