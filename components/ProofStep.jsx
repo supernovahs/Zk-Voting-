@@ -2,10 +2,12 @@ import React, { useEffect } from "react";
 import { parseBytes32String } from "ethers/lib/utils";
 import { useState } from "react";
 import { Group } from "@semaphore-protocol/group";
-
+const { verifyProof } = require("@semaphore-protocol/proof");
+import semaphorejson from "./semaphore.json";
 // import { generateProof } from "@semaphore-protocol/proof";
 import { Button, Input } from "antd";
 const { ethers } = require("ethers");
+const { fs } = require("fs");
 const {
   generateProof,
   packToSolidityProof,
@@ -58,11 +60,33 @@ export default function ProofStep({
   const vote = async () => {
     const group = new Group();
     console.log("Event data ", eve.members);
-    group.addMembers(eve.members);
+    group.addMember(
+      "20000387848825759725163098761303998671373356383079016277873857834298073393811"
+    );
     const externalNullifier = group.root;
     console.log("externalnullifier", externalNullifier);
     const signal = "hello";
     console.log("identitycommitment", identitycommitment.generateCommitment());
+
+    // const verificationKey = await fetch(
+    //   "https://www.trusted-setup-pse.org/semaphore/20/semaphore.json"
+    // ).then(function (res) {
+    //   return res.json();
+    // });
+    // console.log("verificationKey", verificationKey);
+    // const fullProof = await generateProof(
+    //   identitycommitment,
+    //   group,
+    //   externalNullifier,
+    //   signal,
+    //   {
+    //     zkeyFilePath: "/semaphore.zkey",
+    //     wasmFilePath: "/semaphore.wasm",
+    //   }
+    // );
+
+    // const passorNot = await verifyProof(verificationKey, fullProof);
+    // console.log("passorNot", passorNot);
 
     const { proof, publicSignals } = await generateProof(
       identitycommitment,
@@ -81,12 +105,14 @@ export default function ProofStep({
     console.log("Null hash", publicSignals.nullifierHash);
     console.log("G Id", ethers.BigNumber.from(eve.groupId).toString());
     console.log("solidityProof", solidityProof);
+
     const txs = await contract.castVote(
       ethers.utils.formatBytes32String(signal),
       publicSignals.nullifierHash,
       ethers.BigNumber.from(eve.groupId).toString(),
       solidityProof
     );
+
     console.log("txs", txs);
   };
   console.log("singer", signer._address);

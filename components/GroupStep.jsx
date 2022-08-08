@@ -13,6 +13,8 @@ export default function GroupStep({ contract, identitycommitment, onSelect }) {
   const [Coordinator, SetCoordinator] = useState();
   const [NewVoter, SetNewVoter] = useState();
 
+  console.log("signer", contract);
+
   async function getEvents() {
     const events = await contract.queryFilter(contract.filters.NewProposal());
     const members = await contract.queryFilter(contract.filters.MemberAdded());
