@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Group } from "@semaphore-protocol/group";
 const { verifyProof } = require("@semaphore-protocol/proof");
 import semaphorejson from "./semaphore.json";
-// import { generateProof } from "@semaphore-protocol/proof";
 import { Button, Input } from "antd";
 const { ethers } = require("ethers");
 const { fs } = require("fs");
@@ -49,8 +48,12 @@ export default function ProofStep({
       const pollInstance = await contract.polls(
         ethers.BigNumber.from(eve.groupId).toString()
       );
+
       const coordinator = pollInstance.coordinator;
       const pollstate = pollInstance.pollstate;
+      console.log("pollinstance", pollInstance);
+      const proposals = pollInstance.proposals;
+      console.log("proposals", proposals);
       console.log("coordinator", coordinator, "pollstate", pollstate);
       SetCoordinator(coordinator);
     }
@@ -60,33 +63,41 @@ export default function ProofStep({
   const vote = async () => {
     const group = new Group();
     console.log("Event data ", eve.members);
-    group.addMember(
-      "20000387848825759725163098761303998671373356383079016277873857834298073393811"
-    );
-    const externalNullifier = group.root;
+    group.addMembers(eve.members);
+    console.log("group", group);
+    const externalNullifier = ethers.BigNumber.from(group.root).toString();
     console.log("externalnullifier", externalNullifier);
     const signal = "hello";
-    console.log("identitycommitment", identitycommitment.generateCommitment());
+    // console
+    //   .log(
+    //     "identitycommitment",
+    //     ethers.BigNumber.from(identitycommitment.generateCommitment())
+    //   )
+    //   .toString();
 
-    // const verificationKey = await fetch(
-    //   "https://www.trusted-setup-pse.org/semaphore/20/semaphore.json"
-    // ).then(function (res) {
-    //   return res.json();
-    // });
-    // console.log("verificationKey", verificationKey);
-    // const fullProof = await generateProof(
-    //   identitycommitment,
-    //   group,
-    //   externalNullifier,
-    //   signal,
-    //   {
-    //     zkeyFilePath: "/semaphore.zkey",
-    //     wasmFilePath: "/semaphore.wasm",
-    //   }
-    // );
+    const verificationKey = await fetch(
+      "https://www.trusted-setup-pse.org/semaphore/20/semaphore.json"
+    ).then(function (res) {
+      return res.json();
+    });
 
-    // const passorNot = await verifyProof(verificationKey, fullProof);
-    // console.log("passorNot", passorNot);
+    console.log("verificationKey", verificationKey);
+    // const verKey = JSON.parse(fs.readFileSync(verificationKey, "utf-8"));
+    // console.log("verKey", verKey);
+
+    const fullProof = await generateProof(
+      identitycommitment,
+      group,
+      externalNullifier,
+      signal,
+      {
+        zkeyFilePath: "/semaphore.zkey",
+        wasmFilePath: "/semaphore.wasm",
+      }
+    );
+
+    const passorNot = await verifyProof(verificationKey, fullProof);
+    console.log("passorNot", passorNot);
 
     const { proof, publicSignals } = await generateProof(
       identitycommitment,
@@ -98,6 +109,7 @@ export default function ProofStep({
         wasmFilePath: "/semaphore.wasm",
       }
     );
+
     console.log("fullproof", proof, publicSignals);
     const solidityProof = packToSolidityProof(proof);
     console.log("solidityproof", solidityProof);
@@ -105,12 +117,17 @@ export default function ProofStep({
     console.log("Null hash", publicSignals.nullifierHash);
     console.log("G Id", ethers.BigNumber.from(eve.groupId).toString());
     console.log("solidityProof", solidityProof);
+    console.log("external nulliffier", externalNullifier);
 
     const txs = await contract.castVote(
       ethers.utils.formatBytes32String(signal),
       publicSignals.nullifierHash,
       ethers.BigNumber.from(eve.groupId).toString(),
-      solidityProof
+      externalNullifier,
+      solidityProof,
+      {
+        gasLimit: 300000,
+      }
     );
 
     console.log("txs", txs);

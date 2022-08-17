@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 // Importing Sempahore core contract and semaphore verifier contract.
 import "./semaphorecore.sol";
 import "./semaphoregroups.sol";
-
+import "./IVerifier.sol";
 contract ZkVote is SemaphoreCore,SemaphoreGroups{
     mapping(uint => IVerifier) public  verifiers;
     
@@ -73,7 +73,6 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
 
     emit NewProposal(_pollId,_coordinator);
 
-
   }
 
    function hashEventName(bytes32 eventId) internal pure returns (uint256) {
@@ -87,7 +86,6 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
     _addMember(_pollId,_identitycommitment);
 
   }   
-
 
   function getlatestVotes(uint _pollId) public view returns(Results[] memory ){
     
@@ -132,20 +130,20 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
   function castVote(bytes32  _vote,
         uint256 _nullifierHash,
         uint256 _pollId,
-        uint256[8] calldata _proof) external {
+        uint _externalNullifier,
+        uint256[8] calldata _proof) external  {
 
           if(polls[_pollId].pollstate != PollState.Ongoing){
             revert VotingAlreadyStarted();
           }
 
-        uint depth = getDepth(_pollId);
+        uint8 depth = getDepth(_pollId);
         uint256 root = getRoot(_pollId);
         IVerifier verifier = verifiers[depth]; 
-        _verifyProof(_vote, root, _nullifierHash, _pollId, _proof, verifier);
+        _verifyProof(_vote, root, _nullifierHash,_pollId, _proof, verifier);
         _saveNullifierHash(_nullifierHash);
         VotesperProposal[_pollId][_vote] ++;
-  }
-
+        }
 
 function endPoll(uint _pollId) external onlyAdmin(_pollId){
   if(polls[_pollId].pollstate != PollState.Ongoing){
