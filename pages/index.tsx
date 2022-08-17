@@ -30,7 +30,7 @@ const Home: NextPage = () => {
       {Stage ===1?(
         <IdentityStep  onChange = {_Setidentity} onNextClick = {() =>Setstage(2)}/>
       ): Stage === 2 ? (
-        <GroupStep contract = {contract} identitycommitment = {_identity} onSelect = {(e)=>{
+        <GroupStep contract = {contract} identitycommitment = {_identity} onSelect = {(e:any)=>{
           SetEvent(e)
           Setstage(3)
         }} />
