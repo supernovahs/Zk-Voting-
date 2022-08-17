@@ -181,6 +181,7 @@ export default function GroupStep({ contract, identitycommitment, onSelect }) {
               return (
                 <div
                   style={{ border: "2px solid black", margin: 10, padding: 10 }}
+                  key={id}
                 >
                   <p>EventName :{name}</p>
                   <p>GroupId :{id}</p>
