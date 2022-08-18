@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { parseBytes32String } from "ethers/lib/utils";
 import { useState } from "react";
-import { Group } from "@semaphore-protocol/group";
+const { Group } = require("@semaphore-protocol/group");
 const { verifyProof } = require("@semaphore-protocol/proof");
 import semaphorejson from "./semaphore.json";
 import { Button, Input } from "antd";
@@ -68,12 +68,6 @@ export default function ProofStep({
     const externalNullifier = ethers.BigNumber.from(group.root).toString();
     console.log("externalnullifier", externalNullifier);
     const signal = "hello";
-    // console
-    //   .log(
-    //     "identitycommitment",
-    //     ethers.BigNumber.from(identitycommitment.generateCommitment())
-    //   )
-    //   .toString();
 
     const verificationKey = await fetch(
       "https://www.trusted-setup-pse.org/semaphore/20/semaphore.json"
@@ -82,13 +76,11 @@ export default function ProofStep({
     });
 
     console.log("verificationKey", verificationKey);
-    // const verKey = JSON.parse(fs.readFileSync(verificationKey, "utf-8"));
-    // console.log("verKey", verKey);
 
     const fullProof = await generateProof(
       identitycommitment,
       group,
-      externalNullifier,
+      ethers.BigNumber.from(eve.groupId).toString(),
       signal,
       {
         zkeyFilePath: "/semaphore.zkey",
