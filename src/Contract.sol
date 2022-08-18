@@ -138,9 +138,9 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
           }
 
         uint depth = getDepth(_pollId);
-        uint256 root = groups[_pollId].root;
+        uint256 root = getRoot(_pollId);
         IVerifier verifier = verifiers[depth]; 
-        _verifyProof(_vote, root, _nullifierHash,root, _proof, verifier);
+        _verifyProof(_vote, root, _nullifierHash,_externalNullifier, _proof, verifier);
         _saveNullifierHash(_nullifierHash);
         VotesperProposal[_pollId][_vote] ++;
         }
