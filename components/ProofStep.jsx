@@ -16,15 +16,18 @@ export default function ProofStep({
   identitycommitment,
   contract,
   signer,
+  onNextClick,
 }) {
   const [Votes, SetVotes] = useState();
   const [EventData, SetEventData] = useState();
   const [Coordinator, SetCoordinator] = useState();
+  const [Proposals, SetProposals] = useState();
+
   const getVotes = async () => {
-    // const votes = await contract.queryFilter(
-    //   contract.filters.CastedVote(eve.groupId)
-    // );
-    // return votes.map((e) => parseBytes32String(e.args[0]));
+    const votes = await contract.queryFilter(
+      contract.filters.CastedVote(eve.groupId)
+    );
+    return votes.map((e) => parseBytes32String(e.args[0]));
   };
   console.log("eve", eve);
 
@@ -53,21 +56,28 @@ export default function ProofStep({
       const pollstate = pollInstance.pollstate;
       console.log("pollinstance", pollInstance);
       const proposals = pollInstance.proposals;
+      SetProposals(proposals);
       console.log("proposals", proposals);
       console.log("coordinator", coordinator, "pollstate", pollstate);
       SetCoordinator(coordinator);
+
+      let z = await contract.getlatestVotes(
+        ethers.BigNumber.from(eve.groupId).toString()
+      );
+      SetVotes(z);
+
+      console.log("latest votes", z);
     }
     updateEvents();
   }, [signer]);
 
-  const vote = async () => {
+  const vote = async (signal) => {
     const group = new Group();
     console.log("Event data ", eve.members);
     group.addMembers(eve.members);
     console.log("group", group);
     const externalNullifier = ethers.BigNumber.from(group.root).toString();
     console.log("externalnullifier", externalNullifier);
-    const signal = "hello";
 
     const verificationKey = await fetch(
       "https://www.trusted-setup-pse.org/semaphore/20/semaphore.json"
@@ -80,7 +90,7 @@ export default function ProofStep({
     const fullProof = await generateProof(
       identitycommitment,
       group,
-      ethers.BigNumber.from(eve.groupId).toString(),
+      12345,
       signal,
       {
         zkeyFilePath: "/semaphore.zkey",
@@ -90,35 +100,36 @@ export default function ProofStep({
 
     const passorNot = await verifyProof(verificationKey, fullProof);
     console.log("passorNot", passorNot);
+    console.log("fullProof", fullProof);
 
-    const { proof, publicSignals } = await generateProof(
-      identitycommitment,
-      group,
-      externalNullifier,
-      signal,
-      {
-        zkeyFilePath: "/semaphore.zkey",
-        wasmFilePath: "/semaphore.wasm",
-      }
-    );
+    // const { proof, publicSignals } = await generateProof(
+    //   identitycommitment,
+    //   group,
+    //   externalNullifier,
+    //   signal,
+    //   {
+    //     zkeyFilePath: "/semaphore.zkey",
+    //     wasmFilePath: "/semaphore.wasm",
+    //   }
+    // );
 
-    console.log("fullproof", proof, publicSignals);
-    const solidityProof = packToSolidityProof(proof);
-    console.log("solidityproof", solidityProof);
-    console.log("sinal", ethers.utils.formatBytes32String(signal));
-    console.log("Null hash", publicSignals.nullifierHash);
-    console.log("G Id", ethers.BigNumber.from(eve.groupId).toString());
-    console.log("solidityProof", solidityProof);
-    console.log("external nulliffier", externalNullifier);
+    // console.log("fullproof", proof, publicSignals);
+    const solidityProof = packToSolidityProof(fullProof.proof);
+    // console.log("solidityproof", solidityProof);
+    // console.log("sinal", ethers.utils.formatBytes32String(signal));
+    // console.log("Null hash", publicSignals.nullifierHash);
+    // console.log("G Id", ethers.BigNumber.from(eve.groupId).toString());
+    // console.log("solidityProof", solidityProof);
+    // console.log("external nulliffier", externalNullifier);
 
     const txs = await contract.castVote(
       ethers.utils.formatBytes32String(signal),
-      publicSignals.nullifierHash,
+      fullProof.publicSignals.nullifierHash,
       ethers.BigNumber.from(eve.groupId).toString(),
-      externalNullifier,
+      12345,
       solidityProof,
       {
-        gasLimit: 300000,
+        gasLimit: 500000,
       }
     );
 
@@ -126,13 +137,50 @@ export default function ProofStep({
   };
   console.log("singer", signer._address);
 
-  useEffect(() => {
-    getVotes().then(SetVotes);
-  }, []);
+  // useEffect(() => {
+  //   getVotes().then(SetVotes);
+  // }, []);
 
   return (
     <div>
+      <Button
+        onClick={() => {
+          onNextClick();
+        }}
+      >
+        Back
+      </Button>
       <h2>Id: {ethers.BigNumber.from(eve.groupId).toString()}</h2>
+      <h3>
+        {Votes &&
+          Votes.map((val, index) => {
+            return (
+              <div key={index}>
+                {" "}
+                {/* {val.map((v, i) => {
+                  return (
+                    <div key={i}>
+                      {ethers.utils.parseBytes32String(v.proposals).toString()}{" "}
+                      {ethers.BigNumber.from(v.votes).toString()}
+                    </div>
+                  );
+                })} */}
+                Proposal Name:
+                {ethers.utils.parseBytes32String(val.proposals)}:{" "}
+                {ethers.BigNumber.from(val.votes).toString()} votes
+                {
+                  <Button
+                    onClick={async () => {
+                      vote(ethers.utils.parseBytes32String(val.proposals));
+                    }}
+                  >
+                    Vote
+                  </Button>
+                }
+              </div>
+            );
+          })}
+      </h3>
       {/* <h2>Event: {ethers.BigNumber.from(eve.eventName}</h2>  */}
       {
         <div>

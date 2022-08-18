@@ -33,9 +33,9 @@ const Home: NextPage = () => {
         <GroupStep contract = {contract} identitycommitment = {_identity} onSelect = {(e:any)=>{
           SetEvent(e)
           Setstage(3)
-        }} />
+        }} onNextClick = {() => Setstage(1)}/>
       ):(
-        <ProofStep  signer = {signer} eve = {Event} contract  = {contract} identitycommitment = {_identity}  />
+        <ProofStep  onNextClick = {()=> Setstage(2)} signer = {signer} eve = {Event} contract  = {contract} identitycommitment = {_identity}  />
       )}
 
       </div>

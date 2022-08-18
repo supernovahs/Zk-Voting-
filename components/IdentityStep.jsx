@@ -31,6 +31,15 @@ export default function IdentityStep({ onChange, onNextClick }) {
 
   return (
     <div>
+      <div style={{ border: "2px solid black", padding: 10, margin: 10 }}>
+        <h3>What is semaphore?</h3>
+        <p>
+          Semaphore is a zero-knowledge protocol that allows users to prove
+          their membership in a group and send signals such as votes or
+          endorsements without revealing their identity. Additionally, it
+          provides a simple mechanism to prevent double-signaling.
+        </p>
+      </div>
       <div>
         <h2>Identities</h2>
         <p>To vote anonymously , you need to generate a unique identity.</p>
@@ -58,13 +67,7 @@ export default function IdentityStep({ onChange, onNextClick }) {
         >
           Load Existing
         </Button>
-        <Button
-          onClick={async () => {
-            CreateNewidentity();
-          }}
-        >
-          New
-        </Button>
+
         {identity ? (
           <ul>
             <li>

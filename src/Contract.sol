@@ -71,7 +71,7 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
     poll.proposals = _proposals;
     polls[_pollId]= poll;
 
-    emit NewProposal(_pollId,_coordinator);
+    emit NewProposal(_pollId,_eventName);
 
   }
 
@@ -138,9 +138,9 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
           }
 
         uint depth = getDepth(_pollId);
-        uint256 root = getRoot(_pollId);
+        uint256 root = groups[_pollId].root;
         IVerifier verifier = verifiers[depth]; 
-        _verifyProof(_vote, root, _nullifierHash,_externalNullifier, _proof, verifier);
+        _verifyProof(_vote, root, _nullifierHash,root, _proof, verifier);
         _saveNullifierHash(_nullifierHash);
         VotesperProposal[_pollId][_vote] ++;
         }

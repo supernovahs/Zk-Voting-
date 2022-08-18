@@ -5,7 +5,12 @@ import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 const { ethers } = require("ethers");
 const BigNumber = require("bignumber.js");
 
-export default function GroupStep({ contract, identitycommitment, onSelect }) {
+export default function GroupStep({
+  contract,
+  identitycommitment,
+  onSelect,
+  onNextClick,
+}) {
   const [Events, Setevents] = useState();
   const [NewEventName, SetNewEventName] = useState();
   const [NewEventDescription, SetNewEventDescription] = useState();
@@ -22,7 +27,7 @@ export default function GroupStep({ contract, identitycommitment, onSelect }) {
     console.log("members", members);
     return events.map((e) => ({
       groupId: e.args[0],
-      eventName: e.args[0],
+      eventName: e.args[1],
       members: members
         .filter((m) => m.args[0].eq(e.args[0]))
         .map((m) => m.args[1].toString()),
@@ -35,6 +40,7 @@ export default function GroupStep({ contract, identitycommitment, onSelect }) {
       const events = await getEvents();
       // const a = 1;
       Setevents(events);
+      console.log("events", events);
     }
     updateevents();
   }, []);
@@ -70,6 +76,13 @@ export default function GroupStep({ contract, identitycommitment, onSelect }) {
 
   return (
     <div>
+      <Button
+        onClick={() => {
+          onNextClick();
+        }}
+      >
+        Back
+      </Button>
       <h2>Groups</h2>
       <Button
         onClick={async () => {
@@ -176,7 +189,7 @@ export default function GroupStep({ contract, identitycommitment, onSelect }) {
           <div>
             {Events?.map((value, i) => {
               console.log("value", value.groupId, "index", i);
-              let name = ethers.BigNumber.from(value.eventName).toString();
+              let name = ethers.utils.parseBytes32String(value.eventName);
               let id = ethers.BigNumber.from(value.groupId).toString();
               return (
                 <div
