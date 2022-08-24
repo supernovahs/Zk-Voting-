@@ -3,7 +3,6 @@ import { parseBytes32String } from "ethers/lib/utils";
 import { useState } from "react";
 const { Group } = require("@semaphore-protocol/group");
 const { verifyProof } = require("@semaphore-protocol/proof");
-import semaphorejson from "./semaphore.json";
 import { Button, Input } from "antd";
 const { ethers } = require("ethers");
 const { fs } = require("fs");
@@ -21,7 +20,10 @@ export default function ProofStep({
   const [Votes, SetVotes] = useState();
   const [EventData, SetEventData] = useState();
   const [Coordinator, SetCoordinator] = useState();
-  const [Proposals, SetProposals] = useState();
+  const [Proposals, SetProposals] = useState([]);
+  const [Position, SetPosition] = useState([]);
+  const [RemainingVotes, SetRemainingVotes] = useState(100);
+  const [NotEnoughVotes, SetNotEnoughVotes] = useState(false);
 
   const getVotes = async () => {
     const votes = await contract.queryFilter(
@@ -56,7 +58,6 @@ export default function ProofStep({
       const pollstate = pollInstance.pollstate;
       console.log("pollinstance", pollInstance);
       const proposals = pollInstance.proposals;
-      SetProposals(proposals);
       console.log("proposals", proposals);
       console.log("coordinator", coordinator, "pollstate", pollstate);
       SetCoordinator(coordinator);
@@ -64,14 +65,32 @@ export default function ProofStep({
       let z = await contract.getlatestVotes(
         ethers.BigNumber.from(eve.groupId).toString()
       );
+
       SetVotes(z);
+      let a = [];
+
+      Votes &&
+        Votes.map((val, index) => {
+          a[index] = val.proposals;
+        });
+      console.log("a", a);
+
+      SetProposals(a);
+      console.log("Proposals array", Proposals);
 
       console.log("latest votes", z);
     }
     updateEvents();
   }, [signer]);
 
-  const vote = async (signal) => {
+  const vote = async (proposals, position) => {
+    let b = [];
+    for (let i = 0; i < proposals.length; i++) {
+      b[i] = ethers.utils.parseBytes32String(proposals[i]);
+    }
+
+    console.log("proposals", b);
+
     const group = new Group();
     console.log("Event data ", eve.members);
     group.addMembers(eve.members);
@@ -79,67 +98,66 @@ export default function ProofStep({
     const externalNullifier = ethers.BigNumber.from(group.root).toString();
     console.log("externalnullifier", externalNullifier);
 
-    const verificationKey = await fetch(
-      "https://www.trusted-setup-pse.org/semaphore/20/semaphore.json"
-    ).then(function (res) {
-      return res.json();
-    });
+    // const verificationKey = await fetch(
+    //   "https://www.trusted-setup-pse.org/semaphore/20/semaphore.json"
+    // ).then(function (res) {
+    //   return res.json();
+    // });
 
-    console.log("verificationKey", verificationKey);
-
+    // console.log("verificationKey", verificationKey);
     const fullProof = await generateProof(
       identitycommitment,
       group,
       12345,
-      signal,
+      b[0],
       {
         zkeyFilePath: "/semaphore.zkey",
         wasmFilePath: "/semaphore.wasm",
       }
     );
 
-    const passorNot = await verifyProof(verificationKey, fullProof);
-    console.log("passorNot", passorNot);
-    console.log("fullProof", fullProof);
-
-    // const { proof, publicSignals } = await generateProof(
-    //   identitycommitment,
-    //   group,
-    //   externalNullifier,
-    //   signal,
-    //   {
-    //     zkeyFilePath: "/semaphore.zkey",
-    //     wasmFilePath: "/semaphore.wasm",
-    //   }
-    // );
-
-    // console.log("fullproof", proof, publicSignals);
     const solidityProof = packToSolidityProof(fullProof.proof);
-    // console.log("solidityproof", solidityProof);
-    // console.log("sinal", ethers.utils.formatBytes32String(signal));
-    // console.log("Null hash", publicSignals.nullifierHash);
-    // console.log("G Id", ethers.BigNumber.from(eve.groupId).toString());
-    // console.log("solidityProof", solidityProof);
-    // console.log("external nulliffier", externalNullifier);
+    console.log("solidityProof", solidityProof);
+    console.log("b", proposals.length);
+    console.log("position", position.length);
 
-    const txs = await contract.castVote(
-      ethers.utils.formatBytes32String(signal),
-      fullProof.publicSignals.nullifierHash,
-      ethers.BigNumber.from(eve.groupId).toString(),
-      12345,
-      solidityProof,
-      {
-        gasLimit: 500000,
-      }
-    );
-
-    console.log("txs", txs);
+    try {
+      const txs = await contract.castVote(
+        proposals,
+        position,
+        fullProof.publicSignals.nullifierHash,
+        ethers.BigNumber.from(eve.groupId).toString(),
+        12345,
+        solidityProof,
+        {
+          gasLimit: 500000,
+        }
+      );
+    } catch (e) {
+      console.log("error", e);
+    }
   };
-  console.log("singer", signer._address);
+  console.log("signer", signer._address);
 
-  // useEffect(() => {
-  //   getVotes().then(SetVotes);
-  // }, []);
+  const updatePosition = (index, position) => {
+    console.log("index", index);
+    console.log("position", position);
+    let a = Position;
+    a[index] = position;
+    SetPosition(a);
+    console.log("a position", a);
+    console.log("Position", Position);
+    let total = 0;
+    for (let i = 0; i < Position.length; i++) {
+      console.log("position[i]", Position[i]);
+      total += Position[i] * Position[i];
+    }
+    console.log("total", total);
+    SetRemainingVotes(100 - total > 0 ? 100 - total : <p>Not enough votes</p>);
+    if (RemainingVotes < 0) {
+      SetNotEnoughVotes(true);
+    }
+  };
 
   return (
     <div>
@@ -157,29 +175,32 @@ export default function ProofStep({
             return (
               <div key={index}>
                 {" "}
-                {/* {val.map((v, i) => {
-                  return (
-                    <div key={i}>
-                      {ethers.utils.parseBytes32String(v.proposals).toString()}{" "}
-                      {ethers.BigNumber.from(v.votes).toString()}
-                    </div>
-                  );
-                })} */}
                 Proposal Name:
                 {ethers.utils.parseBytes32String(val.proposals)}:{" "}
                 {ethers.BigNumber.from(val.votes).toString()} votes
                 {
-                  <Button
-                    onClick={async () => {
-                      vote(ethers.utils.parseBytes32String(val.proposals));
-                    }}
-                  >
-                    Vote
-                  </Button>
+                  <Input
+                    placeholder="Votes"
+                    value={Position[index]}
+                    onChange={(e) => updatePosition(index, e.target.value)}
+                  ></Input>
                 }
               </div>
             );
           })}
+        {<p>Remaining Votes: {RemainingVotes}</p>}
+        {
+          <Button
+            onClick={async () => {
+              console.log("proposals", Proposals);
+              console.log("Positions ", Position);
+              vote(Proposals, Position);
+            }}
+            disabled={NotEnoughVotes}
+          >
+            Vote
+          </Button>
+        }
       </h3>
       {/* <h2>Event: {ethers.BigNumber.from(eve.eventName}</h2>  */}
       {
@@ -195,13 +216,7 @@ export default function ProofStep({
           )}
         </div>
       }
-      <Button
-        onClick={async () => {
-          await vote();
-        }}
-      >
-        Vote
-      </Button>
+
       {signer._address === Coordinator ? (
         <div>
           <Button
