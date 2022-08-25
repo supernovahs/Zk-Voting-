@@ -4,6 +4,7 @@ import { useState } from "react";
 const { Group } = require("@semaphore-protocol/group");
 const { verifyProof } = require("@semaphore-protocol/proof");
 import { Button, Input } from "antd";
+import axios from "axios";
 const { ethers } = require("ethers");
 const { fs } = require("fs");
 const {
@@ -24,7 +25,7 @@ export default function ProofStep({
   const [Position, SetPosition] = useState([]);
   const [RemainingVotes, SetRemainingVotes] = useState(100);
   const [NotEnoughVotes, SetNotEnoughVotes] = useState(false);
-
+  let BACKEND_URL = "http://localhost:8080/";
   const getVotes = async () => {
     const votes = await contract.queryFilter(
       contract.filters.CastedVote(eve.groupId)
@@ -67,6 +68,7 @@ export default function ProofStep({
       );
 
       SetVotes(z);
+      console.log("z", z);
       let a = [];
 
       Votes &&
@@ -84,6 +86,7 @@ export default function ProofStep({
   }, [signer]);
 
   const vote = async (proposals, position) => {
+    console.log("proposals", proposals);
     let b = [];
     for (let i = 0; i < proposals.length; i++) {
       b[i] = ethers.utils.parseBytes32String(proposals[i]);
@@ -120,22 +123,39 @@ export default function ProofStep({
     console.log("solidityProof", solidityProof);
     console.log("b", proposals.length);
     console.log("position", position.length);
+    let hash = fullProof.publicSignals.nullifierHash;
+    let id = ethers.BigNumber.from(eve.groupId).toString();
+    let externalnull = 12345;
+    let reqdata = {
+      proposals,
+      position,
+      hash,
+      id,
+      externalnull,
+      solidityProof,
+    };
+    const { status } = await fetch(BACKEND_URL + `/vote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(reqdata),
+    });
+    console.log("status", status);
 
-    try {
-      const txs = await contract.castVote(
-        proposals,
-        position,
-        fullProof.publicSignals.nullifierHash,
-        ethers.BigNumber.from(eve.groupId).toString(),
-        12345,
-        solidityProof,
-        {
-          gasLimit: 500000,
-        }
-      );
-    } catch (e) {
-      console.log("error", e);
-    }
+    // try {
+    //   const txs = await contract.castVote(
+    //     proposals,
+    //     position,
+    //     fullProof.publicSignals.nullifierHash,
+    //     ethers.BigNumber.from(eve.groupId).toString(),
+    //     12345,
+    //     solidityProof,
+    //     {
+    //       gasLimit: 500000,
+    //     }
+    //   );
+    // } catch (e) {
+    //   console.log("error", e);
+    // }
   };
   console.log("signer", signer._address);
 

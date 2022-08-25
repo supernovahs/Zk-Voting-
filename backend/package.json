@@ -1,0 +1,24 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Relayer for ZKVoting",
+  "main": "index.ts",
+  "scripts": {
+    "backend": "ts-node index.ts"
+  },
+  "keywords": [
+    "Relayer",
+    "zk"
+  ],
+  "author": "supernovahs.eth",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.12",
+    "ts-node": "^10.9.1"
+  }
+}
