@@ -11,7 +11,7 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
     mapping(uint =>mapping(bytes32 => uint)) public VotesperProposal;
 
 
-    event NewProposal(uint indexed id,address indexed coordinator);
+    event NewProposal(uint indexed id,bytes32 indexed eventname);
     event CastedVote(uint indexed groupId,bytes32 vote);
     event VoteStarts(uint indexed groupId,uint time);
     event VoteEnds(uint indexed groupId,uint time);
@@ -48,6 +48,8 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
       _;
     }
 
+
+
   constructor(uint[] memory _depths,address[] memory _verifieraddresses) payable {
   if(_depths.length != _verifieraddresses.length){
   revert NotSamelength();
@@ -58,6 +60,10 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
     for (uint i=0; i < depthlength;i++) {
             verifiers[_depths[i]] = IVerifier(_verifieraddresses[i]);
     }
+  }
+
+  function getproposals(uint _id) public view returns(bytes32[] memory ){
+    return polls[_id].proposals;
   }
 
   function NewVoteInstance(bytes32 _eventName,string memory _description,bytes32[] memory  _proposals,address  _coordinator,uint8 _depth,uint _zerovalue) public   {
@@ -80,9 +86,9 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
   }
 
   function Addvoter(uint _pollId,uint _identitycommitment) external  onlyAdmin(_pollId) {
-    // if(polls[_pollId].pollstate != PollState.Created){
-    //   revert VotingAlreadyStarted();
-    // }
+    if(polls[_pollId].pollstate != PollState.Created){
+      revert VotingAlreadyStarted();
+    }
     _addMember(_pollId,_identitycommitment);
 
   }   
@@ -127,22 +133,31 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
   emit VoteStarts(_pollId,block.timestamp);
   }
 
-  function castVote(bytes32  _vote,
+  function castVote(
+        bytes32[] calldata _vote,
+        uint[] calldata position,
         uint256 _nullifierHash,
         uint256 _pollId,
-        uint _externalNullifier,
         uint256[8] calldata _proof) external  {
 
           if(polls[_pollId].pollstate != PollState.Ongoing){
             revert VotingAlreadyStarted();
           }
-
+          require(_vote.length == position.length,"Unequal length");
+          
         uint depth = getDepth(_pollId);
-        uint256 root = groups[_pollId].root;
+        uint256 root = getRoot(_pollId);
         IVerifier verifier = verifiers[depth]; 
-        _verifyProof(_vote, root, _nullifierHash,root, _proof, verifier);
+        _verifyProof(_vote[0], root, _nullifierHash,_pollId, _proof, verifier);
         _saveNullifierHash(_nullifierHash);
-        VotesperProposal[_pollId][_vote] ++;
+        uint totalvotes;
+
+        for(uint i; i<position.length; ++i){
+          VotesperProposal[_pollId][_vote[i]] += (position[i]) * (position[i]);   
+          totalvotes += position[i] * position[i];
+        }
+
+        require(totalvotes <=100, "Exceeded");
         }
 
 function endPoll(uint _pollId) external onlyAdmin(_pollId){

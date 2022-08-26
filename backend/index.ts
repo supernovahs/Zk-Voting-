@@ -8,7 +8,7 @@ const ethers = require("ethers");
 const app = express();
 app.use(cors());
 app.use(express.json());
-const {port} = new URL("http://localhost:8080/");
+const {port} = new URL("http://localhost:49899");
 console.log("port ",port);
 
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
@@ -22,26 +22,25 @@ const provider = new ethers.providers.JsonRpcProvider(GoerliRPC);
 const signer = new ethers.Wallet(RelayerPrivateKey ,provider);
 const contract = new ethers.Contract(CONTRACT_ADDRESS,abi.abi,signer);
 
-app.get("/vote", async (req,res)=>{
+app.post("/vote", async (req,res)=>{
 
-    const {proposals,position,nullifierHash,id,externalNullifier,Proof} = req.body
+    const {proposals,position,hash,id,solidityProof} = req.body
+    console.log("proposals",proposals,"position",position,"hash",hash,"id",id,"solidityProof",solidityProof);
 
     try{
-         const tx = await contract.castVote(proposals,position,nullifierHash,id,externalNullifier,Proof,{gasLimit: 500000});
-
-         await tx.wait();
+         const tx = await contract.castVote(proposals,position,hash,id,solidityProof,{gasLimit: 500000});
+        console.log("tx done ",tx);
          res.status(200).end()
     }
+    
     catch(error:any){
         console.log("error",error);
         res.status(200).end();
     }
 });
 
-app.post("/a",async (req,res)=>{
-    console.log("req",res);
-})
 
-var server  = app.listen(port,()=>{
-    console.log("Started to listen  ",server);
+
+app.listen(port,()=>{
+    // console.log("Started to listen  ",server);
 })

@@ -25,7 +25,9 @@ export default function ProofStep({
   const [Position, SetPosition] = useState([]);
   const [RemainingVotes, SetRemainingVotes] = useState(100);
   const [NotEnoughVotes, SetNotEnoughVotes] = useState(false);
-  let BACKEND_URL = "http://localhost:8080/";
+  const [Voting, SetVoting] = useState(false);
+  const [AlreadyVoted, SetAlreadyVoted] = useState(false);
+  let BACKEND_URL = "http://localhost:49899/";
   const getVotes = async () => {
     const votes = await contract.queryFilter(
       contract.filters.CastedVote(eve.groupId)
@@ -68,7 +70,7 @@ export default function ProofStep({
       );
 
       SetVotes(z);
-      console.log("z", z);
+
       let a = [];
 
       Votes &&
@@ -79,13 +81,14 @@ export default function ProofStep({
 
       SetProposals(a);
       console.log("Proposals array", Proposals);
-
+      console.log("");
       console.log("latest votes", z);
     }
     updateEvents();
   }, [signer]);
 
   const vote = async (proposals, position) => {
+    SetVoting(true);
     console.log("proposals", proposals);
     let b = [];
     for (let i = 0; i < proposals.length; i++) {
@@ -101,45 +104,43 @@ export default function ProofStep({
     const externalNullifier = ethers.BigNumber.from(group.root).toString();
     console.log("externalnullifier", externalNullifier);
 
-    // const verificationKey = await fetch(
-    //   "https://www.trusted-setup-pse.org/semaphore/20/semaphore.json"
-    // ).then(function (res) {
-    //   return res.json();
-    // });
-
-    // console.log("verificationKey", verificationKey);
-    const fullProof = await generateProof(
-      identitycommitment,
-      group,
-      12345,
-      b[0],
-      {
-        zkeyFilePath: "/semaphore.zkey",
-        wasmFilePath: "/semaphore.wasm",
-      }
-    );
-
+    let id = ethers.BigNumber.from(eve.groupId).toString();
+    const fullProof = await generateProof(identitycommitment, group, id, b[0], {
+      zkeyFilePath: "/semaphore.zkey",
+      wasmFilePath: "/semaphore.wasm",
+    });
+    console.log("fullProof", fullProof);
+    let ps = fullProof.publicSignals;
+    console.log("ps", ps);
+    let hash = ps.nullifierHash;
+    console.log("dd");
     const solidityProof = packToSolidityProof(fullProof.proof);
     console.log("solidityProof", solidityProof);
     console.log("b", proposals.length);
     console.log("position", position.length);
-    let hash = fullProof.publicSignals.nullifierHash;
-    let id = ethers.BigNumber.from(eve.groupId).toString();
-    let externalnull = 12345;
-    let reqdata = {
-      proposals,
-      position,
-      hash,
-      id,
-      externalnull,
-      solidityProof,
-    };
-    const { status } = await fetch(BACKEND_URL + `/vote`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(reqdata),
-    });
-    console.log("status", status);
+    console.log("sd");
+    let isvoted = await contract.nullifierHashes(hash);
+    console.log("isvoteds", isvoted);
+    if (isvoted == true) {
+      alert("Already Voted ser");
+      SetVoting(false);
+    } else {
+      const { status } = await fetch(`${BACKEND_URL}vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          proposals,
+          position,
+          hash,
+          id,
+          solidityProof,
+        }),
+      });
+      SetVoting(false);
+
+      console.log("status", status);
+      console.log("adf");
+    }
 
     // try {
     //   const txs = await contract.castVote(
@@ -211,6 +212,7 @@ export default function ProofStep({
         {<p>Remaining Votes: {RemainingVotes}</p>}
         {
           <Button
+            loading={Voting}
             onClick={async () => {
               console.log("proposals", Proposals);
               console.log("Positions ", Position);

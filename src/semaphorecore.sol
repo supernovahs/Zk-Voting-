@@ -12,7 +12,7 @@ import "./IVerifier.sol";
 contract SemaphoreCore is ISemaphoreCore {
     /// @dev Gets a nullifier hash and returns true or false.
     /// It is used to prevent double-signaling.
-    mapping(uint256 => bool) internal nullifierHashes;
+    mapping(uint256 => bool) public  nullifierHashes;
 
     /// @dev Asserts that no nullifier already exists and if the zero-knowledge proof is valid.
     /// Otherwise it reverts.
