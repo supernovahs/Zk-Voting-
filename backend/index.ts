@@ -28,6 +28,7 @@ app.post("/vote", async (req,res)=>{
     console.log("proposals",proposals,"position",position,"hash",hash,"id",id,"solidityProof",solidityProof);
 
     try{
+        
          const tx = await contract.castVote(proposals,position,hash,id,solidityProof,{gasLimit: 500000});
         console.log("tx done ",tx);
          res.status(200).end()

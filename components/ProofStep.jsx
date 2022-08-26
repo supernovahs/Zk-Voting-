@@ -26,7 +26,7 @@ export default function ProofStep({
   const [RemainingVotes, SetRemainingVotes] = useState(100);
   const [NotEnoughVotes, SetNotEnoughVotes] = useState(false);
   const [Voting, SetVoting] = useState(false);
-  const [AlreadyVoted, SetAlreadyVoted] = useState(false);
+  const [Id, SetId] = useState();
   let BACKEND_URL = "http://localhost:49899/";
   const getVotes = async () => {
     const votes = await contract.queryFilter(
@@ -64,22 +64,12 @@ export default function ProofStep({
       console.log("proposals", proposals);
       console.log("coordinator", coordinator, "pollstate", pollstate);
       SetCoordinator(coordinator);
-
+      SetId(ethers.BigNumber.from(eve.groupId).toString());
       let z = await contract.getlatestVotes(
         ethers.BigNumber.from(eve.groupId).toString()
       );
-
       SetVotes(z);
 
-      let a = [];
-
-      Votes &&
-        Votes.map((val, index) => {
-          a[index] = val.proposals;
-        });
-      console.log("a", a);
-
-      SetProposals(a);
       console.log("Proposals array", Proposals);
       console.log("");
       console.log("latest votes", z);
@@ -87,15 +77,24 @@ export default function ProofStep({
     updateEvents();
   }, [signer]);
 
+  useEffect(() => {
+    let a = [];
+    Votes &&
+      Votes.map((val, index) => {
+        a[index] = val.proposals;
+      });
+    SetProposals(a);
+    console.log("a", a);
+  }, [Votes]);
+
   const vote = async (proposals, position) => {
     SetVoting(true);
-    console.log("proposals", proposals);
     let b = [];
     for (let i = 0; i < proposals.length; i++) {
       b[i] = ethers.utils.parseBytes32String(proposals[i]);
     }
 
-    console.log("proposals", b);
+    console.log("b", b);
 
     const group = new Group();
     console.log("Event data ", eve.members);
@@ -105,6 +104,7 @@ export default function ProofStep({
     console.log("externalnullifier", externalNullifier);
 
     let id = ethers.BigNumber.from(eve.groupId).toString();
+    console.log("proposalsssss", proposals);
     const fullProof = await generateProof(identitycommitment, group, id, b[0], {
       zkeyFilePath: "/semaphore.zkey",
       wasmFilePath: "/semaphore.wasm",
@@ -214,8 +214,8 @@ export default function ProofStep({
           <Button
             loading={Voting}
             onClick={async () => {
-              console.log("proposals", Proposals);
               console.log("Positions ", Position);
+
               vote(Proposals, Position);
             }}
             disabled={NotEnoughVotes}
