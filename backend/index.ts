@@ -8,7 +8,7 @@ const ethers = require("ethers");
 const app = express();
 app.use(cors());
 app.use(express.json());
-const {port} = new URL("http://localhost:49899");
+const {port} = new URL("https://protected-depths-15088.herokuapp.com/");
 console.log("port ",port);
 
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
