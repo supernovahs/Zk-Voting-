@@ -27,7 +27,7 @@ export default function ProofStep({
   const [NotEnoughVotes, SetNotEnoughVotes] = useState(false);
   const [Voting, SetVoting] = useState(false);
   const [Id, SetId] = useState();
-  let BACKEND_URL = "http://localhost:49899/";
+  let BACKEND_URL = "https://zkvotebackend.herokuapp.com/";
   const getVotes = async () => {
     const votes = await contract.queryFilter(
       contract.filters.CastedVote(eve.groupId)
@@ -125,6 +125,7 @@ export default function ProofStep({
       alert("Already Voted ser");
       SetVoting(false);
     } else {
+      console.log("calling this", `${BACKEND_URL}vote`);
       const { status } = await fetch(`${BACKEND_URL}vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
