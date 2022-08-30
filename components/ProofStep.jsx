@@ -3,8 +3,8 @@ import { parseBytes32String } from "ethers/lib/utils";
 import { useState } from "react";
 const { Group } = require("@semaphore-protocol/group");
 const { verifyProof } = require("@semaphore-protocol/proof");
-import { Button, Input } from "antd";
-import axios from "axios";
+import { Button, Input } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 const { ethers } = require("ethers");
 const { fs } = require("fs");
 const {
@@ -141,6 +141,9 @@ export default function ProofStep({
 
       console.log("status", status);
       console.log("adf");
+      if (status == 200) {
+        alert("Successfully Voted");
+      }
     }
 
     // try {
@@ -199,7 +202,7 @@ export default function ProofStep({
                 {" "}
                 Proposal Name:
                 {ethers.utils.parseBytes32String(val.proposals)}:{" "}
-                {ethers.BigNumber.from(val.votes).toString()} votes
+                {/* {ethers.BigNumber.from(val.votes).toString()} votes */}
                 {
                   <Input
                     placeholder="Votes"
@@ -213,7 +216,7 @@ export default function ProofStep({
         {<p>Remaining Votes: {RemainingVotes}</p>}
         {
           <Button
-            loading={Voting}
+            isLoading={Voting}
             onClick={async () => {
               console.log("Positions ", Position);
 
@@ -255,6 +258,19 @@ export default function ProofStep({
       ) : (
         ""
       )}
+      <div style={{ border: "2px solid black ", margin: 5, padding: 7 }}>
+        <h3> Votes </h3>
+        {Votes &&
+          Votes.map((val, index) => {
+            return (
+              <div key={index}>
+                {" "}
+                {ethers.utils.parseBytes32String(val.proposals)}:{" "}
+                <b>{ethers.BigNumber.from(val.votes).toString()}</b> votes
+              </div>
+            );
+          })}
+      </div>
     </div>
   );
 }

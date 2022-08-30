@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Identity } from "@semaphore-protocol/identity";
-import { Button } from "antd";
+import { Button, Input } from "@chakra-ui/react";
+import copy from "copy-to-clipboard";
 const { ethers } = require("ethers");
 export default function IdentityStep({ onChange, onNextClick }) {
   const [identity, setIdentity] = useState("");
-
+  const [Copied, SetCopied] = useState("");
   async function checkidentity() {
     const identityval = window.localStorage.getItem("identitycommitment");
 
@@ -15,8 +16,13 @@ export default function IdentityStep({ onChange, onNextClick }) {
       onChange(_identity);
     } else {
       console.log("Create new identity");
+      alert("Please create New Identity");
     }
   }
+  const copyToClipboard = (text) => {
+    copy(text);
+    SetCopied("Copied Successfully !!");
+  };
 
   const CreateNewidentity = async () => {
     const identitynew = new Identity();
@@ -43,52 +49,78 @@ export default function IdentityStep({ onChange, onNextClick }) {
       <div>
         <h2>Identities</h2>
         <p>To vote anonymously , you need to generate a unique identity.</p>
-        <ul>
-          <li>
-            Trapdoor:{identity ? identity.getTrapdoor().toString() : ""}{" "}
-            private,only known by user
-          </li>
-          <li>
-            Nullifier:{identity ? identity.getNullifier().toString() : ""}{" "}
-            Private: only known by user
-          </li>
-          <li>
-            Commitment:
-            {identity
-              ? identity.generateCommitment().toString()
-              : ""} public{" "}
-          </li>
-        </ul>
+
+        <div style={{ margin: 10, padding: 10 }}>
+          <Button
+            onClick={async () => {
+              await checkidentity();
+            }}
+          >
+            Load Existing
+          </Button>
+        </div>
         <h3>New identity Generate </h3>
-        <Button
-          onClick={async () => {
-            await checkidentity();
-          }}
-        >
-          Load Existing
-        </Button>
 
         {identity ? (
           <ul>
-            <li>
-              {/* Trapdoor: {identity.getTrapdoor().toString().substring(0, 30)} */}
-            </li>
-            <li>
-              {/* Nullifier: {identity.getNullifier().toString().substring(0, 30)} */}
-            </li>
-            <li>
-              Commitment:{" "}
-              {/* {identity.generateCommitment().toString().substring(0, 30)} */}
-            </li>
+            {identity && (
+              <li>
+                Trapdoor: {""}
+                {identity ? identity.getTrapdoor().toString() : ""}{" "}
+                <b>Don't share this </b>
+                <Button
+                  onClick={() => {
+                    copyToClipboard(identity.getTrapdoor().toString());
+                  }}
+                >
+                  Copy
+                </Button>
+                {Copied}
+              </li>
+            )}
+            {identity && (
+              <li>
+                Nullifier:{""}
+                {identity ? identity.getNullifier().toString() : ""}{" "}
+                <b>Don't Share this </b>
+                <Button
+                  onClick={() => {
+                    copyToClipboard(identity.getNullifier().toString());
+                  }}
+                >
+                  Copy
+                </Button>
+                {Copied}
+              </li>
+            )}
+            {identity && (
+              <li>
+                Commitment:{""}
+                {identity ? identity.generateCommitment().toString() : ""}{" "}
+                <b> This is your public ID</b>{" "}
+                <b>
+                  <Button
+                    onClick={() => {
+                      copyToClipboard(identity.generateCommitment().toString());
+                    }}
+                  >
+                    Copy
+                  </Button>
+                  {Copied}
+                </b>
+              </li>
+            )}
           </ul>
         ) : (
-          <Button
-            onClick={async () => {
-              CreateNewidentity();
-            }}
-          >
-            Create Identity
-          </Button>
+          <div style={{ padding: 10, margin: 10 }}>
+            <Button
+              onClick={async () => {
+                CreateNewidentity();
+              }}
+            >
+              Create Identity
+            </Button>
+          </div>
         )}
         <Button
           onClick={() => {

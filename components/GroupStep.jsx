@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useCallBack, useEffect } from "react";
-import { Button, Input } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Button, Input } from "@chakra-ui/react";
 const { ethers } = require("ethers");
 const BigNumber = require("bignumber.js");
 
