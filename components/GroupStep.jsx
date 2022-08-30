@@ -3,13 +3,14 @@ import { useState, useCallBack, useEffect } from "react";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Button, Input } from "@chakra-ui/react";
 const { ethers } = require("ethers");
-const BigNumber = require("bignumber.js");
 
 export default function GroupStep({
   contract,
   identitycommitment,
   onSelect,
   onNextClick,
+  mainnetprovider,
+  signer,
 }) {
   const [Events, Setevents] = useState();
   const [NewEventName, SetNewEventName] = useState();
@@ -18,11 +19,11 @@ export default function GroupStep({
   const [Coordinator, SetCoordinator] = useState();
   const [NewVoter, SetNewVoter] = useState();
 
-  console.log("signer", contract);
-
   async function getEvents() {
     const events = await contract.queryFilter(contract.filters.NewProposal());
     const members = await contract.queryFilter(contract.filters.MemberAdded());
+    const start = await contract.queryFilter(contract.filters.VoteStarts());
+    const end = await contract.queryFilter(contract.filters.VoteEnds());
     console.log("events", events);
     console.log("members", members);
     return events.map((e) => ({
@@ -31,6 +32,10 @@ export default function GroupStep({
       members: members
         .filter((m) => m.args[0].eq(e.args[0]))
         .map((m) => m.args[1].toString()),
+      coordinator: e.args[2],
+      description: e.args[3],
+      start: start.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
+      end: end.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
     }));
   }
   console.log("Event call", getEvents());
@@ -38,7 +43,6 @@ export default function GroupStep({
   useEffect(() => {
     async function updateevents() {
       const events = await getEvents();
-      // const a = 1;
       Setevents(events);
       console.log("events", events);
     }
@@ -73,6 +77,31 @@ export default function GroupStep({
     console.log("event cehck ", e);
     onSelect(e);
   };
+
+  const getEnsAddress = async (name) => {
+    let ensaddress = await mainnetprovider.resolveName(name);
+    console.log("ensaddress", ensaddress);
+    if (ensaddress) {
+      return ensaddress;
+    } else {
+      return null;
+    }
+  };
+
+  // const UpdateCoordinator = (value) => {
+  //   SetCoordinator(value);
+  //   if (isENS(Coordinator)) {
+  //     let previous = value;
+  //     SetCoordinator(getEnsAddress(Coordinator));
+  //     console.log("ensresolve", getEnsAddress(Coordinator));
+  //     if (!ethers.utils.isAddress(Coordinator)) {
+  //       alert("Invalid ENS Name");
+  //       SetCoordinator("");
+  //     }
+  //   } else {
+  //     ethers.utils.isAddress(value) && SetCoordinator(value);
+  //   }
+  // };
 
   return (
     <div>
@@ -173,6 +202,7 @@ export default function GroupStep({
                   newproposals,
                   Coordinator
                 );
+
                 await contract.NewVoteInstance(
                   ethers.utils.formatBytes32String(NewEventName),
                   NewEventDescription,
@@ -191,6 +221,28 @@ export default function GroupStep({
               console.log("value", value.groupId, "index", i);
               let name = ethers.utils.parseBytes32String(value.eventName);
               let id = ethers.BigNumber.from(value.groupId).toString();
+              let members = value.members;
+              console.log("Mem", members);
+              let isMember = false;
+              let des = value.description;
+              let admin = value.coordinator;
+              console.log("des", des, "admin", admin);
+              for (let i; i < members.length; i++) {
+                if (members[i] == identitycommitment) {
+                  isMember = true;
+                }
+              }
+              let currentstatus = "Created";
+              console.log("value start ", value.start);
+
+              let status =
+                value.start.length != 0
+                  ? (currentstatus = " Voting Started")
+                  : value.end.length != 0
+                  ? (currentstatus = "Voting Ended")
+                  : (currentstatus = "Created");
+              console.log("status", status);
+              let a = isMember ? "You are a member " : "Not Member";
               return (
                 <div
                   style={{ border: "2px solid black", margin: 10, padding: 10 }}
@@ -198,48 +250,37 @@ export default function GroupStep({
                 >
                   <p>EventName :{name}</p>
                   <p>GroupId :{id}</p>
-                  <Button
-                    onClick={() => {
-                      SelectEvent(value);
-                    }}
-                  >
-                    Select
-                  </Button>
+                  <p>Description of Vote: {des}</p>
+                  <h2>{status}</h2>
+                  <Button disabled={true}>{a}</Button>
+                  <div style={{ padding: 10, margin: 7 }}>
+                    <Button
+                      onClick={() => {
+                        SelectEvent(value);
+                      }}
+                    >
+                      Select
+                    </Button>
+                  </div>
                   <Input
                     placeholder="Add voter credentials"
                     value={NewVoter}
                     onChange={(e) => SetNewVoter(e.target.value)}
                   />
-                  <Button
-                    onClick={async () => {
-                      const tx = await contract.Addvoter(id, NewVoter);
-                      console.log("tx", tx);
-                    }}
-                  >
-                    Add Members
-                  </Button>
+                  {signer._address == admin ? (
+                    <Button
+                      onClick={async () => {
+                        const tx = await contract.Addvoter(id, NewVoter);
+                        console.log("tx", tx);
+                      }}
+                    >
+                      Add Members
+                    </Button>
+                  ) : (
+                    <p>You are not Admin</p>
+                  )}
                 </div>
               );
-
-              // {
-              //   value.members.includes(identitycommitment) ? (
-              //     <Button
-              //       onClick={() => {
-              //         onSelect(value);
-              //       }}
-              //     >
-              //       Joined
-              //     </Button>
-              //   ) : (
-              //     <Button
-              //       onClick={() => {
-              //         joinEvent(value);
-              //       }}
-              //     >
-              //       Join
-              //     </Button>
-              //   );
-              // }
             })}
           </div>
         </div>

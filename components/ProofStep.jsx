@@ -4,7 +4,17 @@ import { useState } from "react";
 const { Group } = require("@semaphore-protocol/group");
 const { verifyProof } = require("@semaphore-protocol/proof");
 import { Button, Input } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import { Spinner } from "@chakra-ui/react";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from "@chakra-ui/react";
 const { ethers } = require("ethers");
 const { fs } = require("fs");
 const {
@@ -18,6 +28,7 @@ export default function ProofStep({
   signer,
   onNextClick,
 }) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [Votes, SetVotes] = useState();
   const [EventData, SetEventData] = useState();
   const [Coordinator, SetCoordinator] = useState();
@@ -28,6 +39,8 @@ export default function ProofStep({
   const [Voting, SetVoting] = useState(false);
   const [Id, SetId] = useState();
   let BACKEND_URL = "https://zkvotebackend.herokuapp.com/";
+  const initialRef = React.useRef(null);
+  const finalRef = React.useRef(null);
   const getVotes = async () => {
     const votes = await contract.queryFilter(
       contract.filters.CastedVote(eve.groupId)
@@ -145,28 +158,9 @@ export default function ProofStep({
         alert("Successfully Voted");
       }
     }
-
-    // try {
-    //   const txs = await contract.castVote(
-    //     proposals,
-    //     position,
-    //     fullProof.publicSignals.nullifierHash,
-    //     ethers.BigNumber.from(eve.groupId).toString(),
-    //     12345,
-    //     solidityProof,
-    //     {
-    //       gasLimit: 500000,
-    //     }
-    //   );
-    // } catch (e) {
-    //   console.log("error", e);
-    // }
   };
-  console.log("signer", signer._address);
 
   const updatePosition = (index, position) => {
-    console.log("index", index);
-    console.log("position", position);
     let a = Position;
     a[index] = position;
     SetPosition(a);
@@ -200,7 +194,6 @@ export default function ProofStep({
             return (
               <div key={index}>
                 {" "}
-                Proposal Name:
                 {ethers.utils.parseBytes32String(val.proposals)}:{" "}
                 {/* {ethers.BigNumber.from(val.votes).toString()} votes */}
                 {
@@ -214,21 +207,48 @@ export default function ProofStep({
             );
           })}
         {<p>Remaining Votes: {RemainingVotes}</p>}
-        {
-          <Button
-            isLoading={Voting}
-            onClick={async () => {
-              console.log("Positions ", Position);
-
-              vote(Proposals, Position);
-            }}
-            disabled={NotEnoughVotes}
-          >
-            Vote
-          </Button>
-        }
       </h3>
-      {/* <h2>Event: {ethers.BigNumber.from(eve.eventName}</h2>  */}
+      <div>
+        <Button onClick={onOpen}>Vote</Button>
+
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Confirm Your Vote</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              {Votes &&
+                Votes.map((val, index) => {
+                  return (
+                    <div key={index}>
+                      {ethers.utils.parseBytes32String(val.proposals)}:{" "}
+                      {Position && Position[index] * Position[index]}{" "}
+                      <p>Votes</p>
+                    </div>
+                  );
+                })}
+            </ModalBody>
+
+            <ModalFooter>
+              <Button colorScheme="blue" mr={3} onClick={onClose}>
+                Close
+              </Button>
+              <Button
+                variant="ghost"
+                isLoading={Voting}
+                onClick={async () => {
+                  console.log("Positions ", Position);
+
+                  vote(Proposals, Position);
+                }}
+                disabled={NotEnoughVotes}
+              >
+                Vote
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </div>
       {
         <div>
           {EventData && EventData[0] && EventData[0].time ? (

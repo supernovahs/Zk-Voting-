@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Identity } from "@semaphore-protocol/identity";
 import { Button, Input } from "@chakra-ui/react";
+import { useEnsResolver } from "wagmi";
 import copy from "copy-to-clipboard";
 const { ethers } = require("ethers");
 export default function IdentityStep({ onChange, onNextClick }) {

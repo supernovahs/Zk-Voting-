@@ -17,6 +17,7 @@ const Home: NextPage = () => {
   const { data: signer, isError, isLoading } = useSigner();
 
   const contract = new ethers.Contract(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,abi.abi,signer);
+  const mainnetprovider = new ethers.providers.JsonRpcProvider("https://eth-mainnet.g.alchemy.com/v2/gDhsVUBEe61W2Q0w40A7Jwr3ZVyJ_Mvo");
   console.log("Contracct Instance ",contract);
   console.log("Event in index",Event);
   return (
@@ -30,7 +31,7 @@ const Home: NextPage = () => {
       {Stage ===1?(
         <IdentityStep  onChange = {_Setidentity} onNextClick = {() =>Setstage(2)}/>
       ): Stage === 2 ? (
-        <GroupStep contract = {contract} identitycommitment = {_identity} onSelect = {(e:any)=>{
+        <GroupStep contract = {contract} signer = {signer} mainnetprovider = {mainnetprovider}  identitycommitment = {_identity} onSelect = {(e:any)=>{
           SetEvent(e)
           Setstage(3)
         }} onNextClick = {() => Setstage(1)}/>

@@ -11,7 +11,7 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
     mapping(uint =>mapping(bytes32 => uint)) public VotesperProposal;
 
 
-    event NewProposal(uint indexed id,bytes32 indexed eventname);
+    event NewProposal(uint indexed id,bytes32 indexed eventname,address coordinator,string description);
     event CastedVote(uint indexed groupId,bytes32 vote);
     event VoteStarts(uint indexed groupId,uint time);
     event VoteEnds(uint indexed groupId,uint time);
@@ -77,7 +77,7 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
     poll.proposals = _proposals;
     polls[_pollId]= poll;
 
-    emit NewProposal(_pollId,_eventName);
+    emit NewProposal(_pollId,_eventName,_coordinator,_description);
 
   }
 
