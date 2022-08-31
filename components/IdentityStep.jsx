@@ -68,7 +68,7 @@ export default function IdentityStep({ onChange, onNextClick }) {
               <li>
                 Trapdoor: {""}
                 {identity ? identity.getTrapdoor().toString() : ""}{" "}
-                <b>Don't share this </b>
+                <b>Don&apos;t share this </b>
                 <Button
                   onClick={() => {
                     copyToClipboard(identity.getTrapdoor().toString());
@@ -83,7 +83,7 @@ export default function IdentityStep({ onChange, onNextClick }) {
               <li>
                 Nullifier:{""}
                 {identity ? identity.getNullifier().toString() : ""}{" "}
-                <b>Don't Share this </b>
+                <b>Don&apos;t Share this </b>
                 <Button
                   onClick={() => {
                     copyToClipboard(identity.getNullifier().toString());
