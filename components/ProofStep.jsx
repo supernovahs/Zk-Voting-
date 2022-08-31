@@ -6,6 +6,7 @@ const { verifyProof } = require("@semaphore-protocol/proof");
 import { Button, Input } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
 import { Spinner } from "@chakra-ui/react";
+import { Switch, Route } from "react-router-dom";
 import {
   Modal,
   ModalOverlay,
@@ -130,7 +131,6 @@ export default function ProofStep({
     const solidityProof = packToSolidityProof(fullProof.proof);
     console.log("solidityProof", solidityProof);
     console.log("b", proposals.length);
-    console.log("position", position.length);
     console.log("sd");
     let isvoted = await contract.nullifierHashes(hash);
     console.log("isvoteds", isvoted);
@@ -139,6 +139,8 @@ export default function ProofStep({
       SetVoting(false);
     } else {
       console.log("calling this", `${BACKEND_URL}vote`);
+      console.log("position", position);
+      console.log("proposals", proposals);
       const { status } = await fetch(`${BACKEND_URL}vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -154,9 +156,6 @@ export default function ProofStep({
 
       console.log("status", status);
       console.log("adf");
-      if (status == 200) {
-        alert("Successfully Voted");
-      }
     }
   };
 
@@ -238,7 +237,7 @@ export default function ProofStep({
                 isLoading={Voting}
                 onClick={async () => {
                   console.log("Positions ", Position);
-
+                  console.log("Proposals", Proposals);
                   vote(Proposals, Position);
                 }}
                 disabled={NotEnoughVotes}
