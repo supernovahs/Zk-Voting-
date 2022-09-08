@@ -5,6 +5,7 @@ const { Group } = require("@semaphore-protocol/group");
 const { verifyProof } = require("@semaphore-protocol/proof");
 import { Button, Input } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
+import Link from "next/link";
 import { Spinner } from "@chakra-ui/react";
 import { Switch, Route } from "react-router-dom";
 import {
@@ -42,17 +43,28 @@ export default function ProofStep({
   let BACKEND_URL = "https://zkvotebackend.herokuapp.com/";
   const initialRef = React.useRef(null);
   const finalRef = React.useRef(null);
-  const getVotes = async () => {
-    const votes = await contract.queryFilter(
-      contract.filters.CastedVote(eve.groupId)
-    );
-    return votes.map((e) => parseBytes32String(e.args[0]));
-  };
-  console.log("eve", eve);
+  console.log(
+    "eve",
+    eve,
+    "identitycommitment",
+    identitycommitment,
+    "signer",
+    signer,
+    "contract",
+    contract
+  );
+  // const getVotes = async () => {
+  //   console.log("eve", eve);
+  //   const votes = await contract.queryFilter(
+  //     contract.filters.CastedVote(eve[0].groupId)
+  //   );
+  //   return votes.map((e) => parseBytes32String(e.args[0]));
+  // };
 
   async function getEvents() {
+    console.log("eve", eve);
     const start = await contract.queryFilter(
-      contract.filters.VoteStarts(eve.groupId)
+      contract.filters.VoteStarts(eve[0].groupId)
     );
     console.log(start);
     return start.map((e) => ({
@@ -63,42 +75,53 @@ export default function ProofStep({
 
   useEffect(() => {
     async function updateEvents() {
-      const events = await getEvents();
-      console.log("events", events);
-      SetEventData(events);
-      console.log("id", ethers.BigNumber.from(eve.groupId).toString());
-      const pollInstance = await contract.polls(
-        ethers.BigNumber.from(eve.groupId).toString()
-      );
+      console.log("eve is 0 ? ", eve);
+      if (eve == 0) {
+        console.log("eve is null", eve);
+        return null;
+      } else {
+        console.log("eve is not null", eve);
+        const events = await getEvents();
+        console.log("events", events);
+        SetEventData(events);
+        console.log("eve", eve);
+        console.log("id", ethers.BigNumber.from(eve[0].groupId).toString());
+        const pollInstance = await contract.polls(
+          ethers.BigNumber.from(eve[0].groupId).toString()
+        );
+        const coordinator = pollInstance.coordinator;
+        const pollstate = pollInstance.pollstate;
+        console.log("pollinstance", pollInstance);
+        const proposals = pollInstance.proposals;
+        console.log("proposals", proposals);
+        console.log("coordinator", coordinator, "pollstate", pollstate);
+        SetCoordinator(coordinator);
+        SetId(ethers.BigNumber.from(eve[0].groupId).toString());
+        let z = await contract.getlatestVotes(
+          ethers.BigNumber.from(eve[0].groupId).toString()
+        );
+        SetVotes(z);
 
-      const coordinator = pollInstance.coordinator;
-      const pollstate = pollInstance.pollstate;
-      console.log("pollinstance", pollInstance);
-      const proposals = pollInstance.proposals;
-      console.log("proposals", proposals);
-      console.log("coordinator", coordinator, "pollstate", pollstate);
-      SetCoordinator(coordinator);
-      SetId(ethers.BigNumber.from(eve.groupId).toString());
-      let z = await contract.getlatestVotes(
-        ethers.BigNumber.from(eve.groupId).toString()
-      );
-      SetVotes(z);
-
-      console.log("Proposals array", Proposals);
-      console.log("");
-      console.log("latest votes", z);
+        console.log("Proposals array", Proposals);
+        console.log("");
+        console.log("latest votes", z);
+      }
     }
     updateEvents();
   }, [signer]);
 
   useEffect(() => {
-    let a = [];
-    Votes &&
-      Votes.map((val, index) => {
-        a[index] = val.proposals;
-      });
-    SetProposals(a);
-    console.log("a", a);
+    if (eve == null) {
+      return null;
+    } else {
+      let a = [];
+      Votes &&
+        Votes.map((val, index) => {
+          a[index] = val.proposals;
+        });
+      SetProposals(a);
+      console.log("a", a);
+    }
   }, [Votes]);
 
   const vote = async (proposals, position) => {
@@ -179,117 +202,124 @@ export default function ProofStep({
 
   return (
     <div>
-      <Button
-        onClick={() => {
-          onNextClick();
-        }}
-      >
-        Back
-      </Button>
-      <h2>Id: {ethers.BigNumber.from(eve.groupId).toString()}</h2>
-      <h3>
-        {Votes &&
-          Votes.map((val, index) => {
-            return (
-              <div key={index}>
-                {" "}
-                {ethers.utils.parseBytes32String(val.proposals)}:{" "}
-                {/* {ethers.BigNumber.from(val.votes).toString()} votes */}
-                {
-                  <Input
-                    placeholder="Votes"
-                    value={Position[index]}
-                    onChange={(e) => updatePosition(index, e.target.value)}
-                  ></Input>
-                }
-              </div>
-            );
-          })}
-        {<p>Remaining Votes: {RemainingVotes}</p>}
-      </h3>
-      <div>
-        <Button onClick={onOpen}>Vote</Button>
-
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Confirm Your Vote</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              {Votes &&
-                Votes.map((val, index) => {
-                  return (
-                    <div key={index}>
-                      {ethers.utils.parseBytes32String(val.proposals)}:{" "}
-                      {Position && Position[index] * Position[index]}{" "}
-                      <p>Votes</p>
-                    </div>
-                  );
-                })}
-            </ModalBody>
-
-            <ModalFooter>
-              <Button colorScheme="blue" mr={3} onClick={onClose}>
-                Close
-              </Button>
-              <Button
-                variant="ghost"
-                isLoading={Voting}
-                onClick={async () => {
-                  console.log("Positions ", Position);
-                  console.log("Proposals", Proposals);
-                  vote(Proposals, Position);
-                }}
-                disabled={NotEnoughVotes}
-              >
-                Vote
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      </div>
-      {
-        <div>
-          {EventData && EventData[0] && EventData[0].time ? (
-            <h2>
-              {" "}
-              Start Time:{" "}
-              {new Date(Number(EventData[0].time) * 1000).toLocaleString()}{" "}
-            </h2>
-          ) : (
-            <h2>Not Started</h2>
-          )}
-        </div>
-      }
-
-      {signer._address === Coordinator ? (
-        <div>
-          <Button
-            onClick={async () => {
-              await contract.StartPoll(
-                ethers.BigNumber.from(eve.groupId).toString()
-              );
-            }}
-          >
-            Start Poll
-          </Button>
+      {eve == 0 ? (
+        <div style={{ marginLeft: 30, marginTop: 20 }}>
+          <h1>This id does not exist!!</h1>
         </div>
       ) : (
-        ""
+        <div>
+          <Link href="/">Back</Link>
+
+          {eve && eve.groupId && (
+            <h2>Id: {ethers.BigNumber.from(eve.groupId).toString()}</h2>
+          )}
+          <h3>
+            {Votes &&
+              Votes.map((val, index) => {
+                return (
+                  <div key={index}>
+                    {" "}
+                    {ethers.utils.parseBytes32String(val.proposals)}:{" "}
+                    {/* {ethers.BigNumber.from(val.votes).toString()} votes */}
+                    {
+                      <Input
+                        placeholder="Votes"
+                        value={Position[index]}
+                        onChange={(e) => updatePosition(index, e.target.value)}
+                      ></Input>
+                    }
+                  </div>
+                );
+              })}
+            {<p>Remaining Votes: {RemainingVotes}</p>}
+          </h3>
+          <div>
+            <Button onClick={onOpen}>Vote</Button>
+
+            <Modal isOpen={isOpen} onClose={onClose}>
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>Confirm Your Vote</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                  {Votes &&
+                    Votes.map((val, index) => {
+                      return (
+                        <div key={index}>
+                          {ethers.utils.parseBytes32String(val.proposals)}:{" "}
+                          {Position && Position[index] * Position[index]}{" "}
+                          <p>Votes</p>
+                        </div>
+                      );
+                    })}
+                </ModalBody>
+
+                <ModalFooter>
+                  <Button colorScheme="blue" mr={3} onClick={onClose}>
+                    Close
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    isLoading={Voting}
+                    onClick={async () => {
+                      console.log("Positions ", Position);
+                      console.log("Proposals", Proposals);
+                      vote(Proposals, Position);
+                    }}
+                    disabled={NotEnoughVotes}
+                  >
+                    Vote
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+          </div>
+          {
+            <div>
+              {EventData && EventData[0] && EventData[0].time != 0 ? (
+                <h2>
+                  {" "}
+                  Start Time:{" "}
+                  {new Date(
+                    Number(EventData[0].time) * 1000
+                  ).toLocaleString()}{" "}
+                </h2>
+              ) : (
+                <h2>Not Started</h2>
+              )}
+            </div>
+          }
+
+          {signer._address === Coordinator ? (
+            <div>
+              <Button
+                onClick={async () => {
+                  await contract.StartPoll(
+                    ethers.BigNumber.from(eve[0].groupId).toString()
+                  );
+                }}
+              >
+                Start Poll
+              </Button>
+            </div>
+          ) : (
+            ""
+          )}
+          <div style={{ border: "2px solid black ", margin: 5, padding: 7 }}>
+            <h3> Votes </h3>
+            {Votes &&
+              Votes.map((val, index) => {
+                return (
+                  <div key={index}>
+                    {" "}
+                    {ethers.utils.parseBytes32String(val.proposals)}:{" "}
+                    <b>{ethers.BigNumber.from(val.votes).toString()}</b> votes
+                  </div>
+                );
+              })}
+          </div>
+        </div>
       )}
-      <div style={{ border: "2px solid black ", margin: 5, padding: 7 }}>
-        <h3> Votes </h3>
-        {Votes &&
-          Votes.map((val, index) => {
-            return (
-              <div key={index}>
-                {" "}
-                {ethers.utils.parseBytes32String(val.proposals)}:{" "}
-                <b>{ethers.BigNumber.from(val.votes).toString()}</b> votes
-              </div>
-            );
-          })}
-      </div>
     </div>
   );
 }

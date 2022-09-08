@@ -2,6 +2,8 @@ import React from "react";
 import { useState, useCallBack, useEffect } from "react";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Button, Input } from "@chakra-ui/react";
+import Link from "next/link";
+
 const { ethers } = require("ethers");
 
 export default function GroupStep({
@@ -105,13 +107,7 @@ export default function GroupStep({
 
   return (
     <div>
-      <Button
-        onClick={() => {
-          onNextClick();
-        }}
-      >
-        Back
-      </Button>
+      <Link href="/">Back</Link>
       <h2>Groups</h2>
       <Button
         onClick={async () => {
@@ -120,7 +116,6 @@ export default function GroupStep({
       >
         Refresh
       </Button>
-
       <div>
         <div>
           <div
@@ -217,71 +212,81 @@ export default function GroupStep({
             </Button>
           </div>
           <div>
-            {Events?.map((value, i) => {
-              console.log("value", value.groupId, "index", i);
-              let name = ethers.utils.parseBytes32String(value.eventName);
-              let id = ethers.BigNumber.from(value.groupId).toString();
-              let members = value.members;
-              console.log("Mem", members);
-              let isMember = false;
-              let des = value.description;
-              let admin = value.coordinator;
-              console.log("des", des, "admin", admin);
-              for (let i; i < members.length; i++) {
-                if (members[i] == identitycommitment) {
-                  isMember = true;
-                }
-              }
-              let currentstatus = "Created";
-              console.log("value start ", value.start);
+            {Events &&
+              Events.map((value, i) => {
+                console.log("value", value.groupId, "index", i);
+                let name = ethers.utils.parseBytes32String(value.eventName);
+                let id = ethers.BigNumber.from(value.groupId).toString();
+                let members = value.members;
+                console.log("Mem", members);
+                let isMember = false;
+                let des = value.description;
+                let admin = value.coordinator;
 
-              let status =
-                value.start.length != 0
-                  ? (currentstatus = " Voting Started")
-                  : value.end.length != 0
-                  ? (currentstatus = "Voting Ended")
-                  : (currentstatus = "Created");
-              console.log("status", status);
-              let a = isMember ? "You are a member " : "Not Member";
-              return (
-                <div
-                  style={{ border: "2px solid black", margin: 10, padding: 10 }}
-                  key={id}
-                >
-                  <p>EventName :{name}</p>
-                  <p>GroupId :{id}</p>
-                  <p>Description of Vote: {des}</p>
-                  <h2>{status}</h2>
-                  <Button disabled={true}>{a}</Button>
-                  <div style={{ padding: 10, margin: 7 }}>
-                    <Button
-                      onClick={() => {
-                        SelectEvent(value);
-                      }}
-                    >
-                      Select
-                    </Button>
+                for (let i = 0; i < members.length; i++) {
+                  console.log("checking if member");
+                  console.log(
+                    "members",
+                    members[i],
+                    "identitycommitment",
+                    identitycommitment
+                  );
+                  if (
+                    members[i] ==
+                    identitycommitment.generateCommitment().toString()
+                  ) {
+                    console.log("is Member");
+                    isMember = true;
+                  }
+                }
+                let currentstatus = "Created";
+                console.log("value start ", value.start);
+
+                let status =
+                  value.start.length != 0
+                    ? (currentstatus = " Voting Started")
+                    : value.end.length != 0
+                    ? (currentstatus = "Voting Ended")
+                    : (currentstatus = "Created");
+                console.log("status", status);
+                let a = isMember ? "You are a member " : "Not Member";
+                return (
+                  <div
+                    style={{
+                      border: "2px solid black",
+                      margin: 10,
+                      padding: 10,
+                    }}
+                    key={id}
+                  >
+                    <p>EventName :{name}</p>
+                    <p>GroupId :{id}</p>
+                    <p>Description of Vote: {des}</p>
+                    <h2>{status}</h2>
+                    <Button disabled={true}>{a}</Button>
+                    <div style={{ padding: 10, margin: 7 }}>
+                      <Link href={"Vote/" + id}>Select</Link>
+                    </div>
+                    <Input
+                      placeholder="Add voter credentials"
+                      value={NewVoter}
+                      onChange={(e) => SetNewVoter(e.target.value)}
+                    />
+                    {signer._address == admin ? (
+                      <Button
+                        onClick={async () => {
+                          const tx = await contract.Addvoter(id, NewVoter);
+                          console.log("tx", tx);
+                        }}
+                      >
+                        Add Members
+                      </Button>
+                    ) : (
+                      <p>You are not Admin</p>
+                    )}
                   </div>
-                  <Input
-                    placeholder="Add voter credentials"
-                    value={NewVoter}
-                    onChange={(e) => SetNewVoter(e.target.value)}
-                  />
-                  {signer._address == admin ? (
-                    <Button
-                      onClick={async () => {
-                        const tx = await contract.Addvoter(id, NewVoter);
-                        console.log("tx", tx);
-                      }}
-                    >
-                      Add Members
-                    </Button>
-                  ) : (
-                    <p>You are not Admin</p>
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
       </div>

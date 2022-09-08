@@ -9,10 +9,13 @@ export default function IdentityStep({ onChange, onNextClick }) {
   const [Copied, SetCopied] = useState("");
   async function checkidentity() {
     const identityval = window.localStorage.getItem("identitycommitment");
+    console.log("identityval", identityval);
 
     if (identityval) {
       const _identity = new Identity(identityval);
       setIdentity(_identity);
+      window.localStorage.setItem("identitycommitment", _identity);
+      console.log("_identity", _identity);
       console.log("Successfully loaded identity");
       onChange(_identity);
     } else {
@@ -32,7 +35,7 @@ export default function IdentityStep({ onChange, onNextClick }) {
     let a = ethers.BigNumber.from(publicid).toString();
     console.log("identitycommitment", a);
 
-    localStorage.setItem("identitycommitment", identitynew.toString());
+    window.localStorage.setItem("identitycommitment", identitynew.toString());
     onChange(identitynew);
   };
 
