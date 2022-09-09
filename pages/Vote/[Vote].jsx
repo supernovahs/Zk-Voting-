@@ -3,6 +3,7 @@ import ProofStep from "../../components/ProofStep";
 import { useSigner } from "wagmi";
 import { useRouter } from "next/router";
 import abi from "../../helpers/ZkVote.json";
+import { Identity } from "@semaphore-protocol/identity";
 const { ethers } = require("ethers");
 
 export default function Vote() {
@@ -10,7 +11,7 @@ export default function Vote() {
   const [Contract, SetContract] = useState();
   const [Mainnetprovider, SetMainnetprovider] = useState();
   const [Events, SetEvents] = useState();
-  const [Identity, SetIdentity] = useState();
+  const [_Identity, SetIdentity] = useState();
   const router = useRouter();
   const { Vote } = router.query;
 
@@ -27,16 +28,16 @@ export default function Vote() {
   useEffect(() => {
     const get = async () => {
       SetMainnetprovider(mainnetprovider);
-      const identity = window.localStorage.getItem("identitycommitment");
-      const trapdoor = identity.getTrapdoor().toString();
-      console.log("trapdoor", trapdoor);
-      console.log("identity", identity);
-      SetIdentity(identity);
+      const iden = window.localStorage.getItem("identitycommitment");
+      if (iden) {
+        const identity = new Identity(iden);
+        SetIdentity(identity);
+      }
       const event = await getEvents();
       console.log("event", event);
       console.log("signer", signer);
       console.log("contract", contract);
-      console.log("identity", identity);
+      console.log("identity", _Identity);
       SetEvents(event);
     };
     get();
@@ -57,6 +58,7 @@ export default function Vote() {
       const start = await contract.queryFilter(
         contract.filters.NewProposal(Vote)
       );
+
       console.log("start", start);
       console.log("Poll state is 0 ");
       return start.map((e) => ({
@@ -88,7 +90,7 @@ export default function Vote() {
           signer={signer}
           eve={Events}
           contract={contract}
-          identitycommitment={Identity}
+          identitycommitment={_Identity}
         />
       )}
     </div>

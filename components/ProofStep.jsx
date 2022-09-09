@@ -66,6 +66,7 @@ export default function ProofStep({
     const start = await contract.queryFilter(
       contract.filters.VoteStarts(eve[0].groupId)
     );
+
     console.log(start);
     return start.map((e) => ({
       groupId: e.args[0],
@@ -124,6 +125,22 @@ export default function ProofStep({
     }
   }, [Votes]);
 
+  const getMembers = async () => {
+    const events = await contract.queryFilter(
+      contract.filters.NewProposal(eve[0].groupId)
+    );
+    const members = await contract.queryFilter(contract.filters.MemberAdded());
+    console.log("members", members);
+    console.log("events", events);
+    return events.map((e) => ({
+      groupId: e.args[0],
+      members: members
+        .filter((m) => m.args[0].eq(e.args[0]))
+        .map((m) => m.args[1].toString()),
+    }));
+  };
+  console.log("GetMembers", getMembers());
+
   const vote = async (proposals, position) => {
     SetVoting(true);
     let b = [];
@@ -132,15 +149,16 @@ export default function ProofStep({
     }
 
     console.log("b", b);
-
+    const mem = await getMembers();
+    // console.log("mem", mem);
     const group = new Group();
-    console.log("Event data ", eve.members);
-    group.addMembers(eve.members);
+    // console.log("Event data ", eve.members);
+    group.addMembers(mem[0].members);
     console.log("group", group);
     const externalNullifier = ethers.BigNumber.from(group.root).toString();
     console.log("externalnullifier", externalNullifier);
 
-    let id = ethers.BigNumber.from(eve.groupId).toString();
+    let id = ethers.BigNumber.from(eve[0].groupId).toString();
     console.log("proposalsssss", proposals);
     const fullProof = await generateProof(identitycommitment, group, id, b[0], {
       zkeyFilePath: "/semaphore.zkey",

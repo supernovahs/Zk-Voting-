@@ -3,8 +3,9 @@ import { Identity } from "@semaphore-protocol/identity";
 import { Button, Input } from "@chakra-ui/react";
 import { useEnsResolver } from "wagmi";
 import copy from "copy-to-clipboard";
+import { CopyIcon } from "@chakra-ui/icons";
 const { ethers } = require("ethers");
-export default function IdentityStep({ onChange, onNextClick }) {
+export default function IdentityStep({}) {
   const [identity, setIdentity] = useState("");
   const [Copied, SetCopied] = useState("");
   async function checkidentity() {
@@ -17,7 +18,6 @@ export default function IdentityStep({ onChange, onNextClick }) {
       window.localStorage.setItem("identitycommitment", _identity);
       console.log("_identity", _identity);
       console.log("Successfully loaded identity");
-      onChange(_identity);
     } else {
       console.log("Create new identity");
       alert("Please create New Identity");
@@ -25,7 +25,6 @@ export default function IdentityStep({ onChange, onNextClick }) {
   }
   const copyToClipboard = (text) => {
     copy(text);
-    SetCopied("Copied Successfully !!");
   };
 
   const CreateNewidentity = async () => {
@@ -35,41 +34,37 @@ export default function IdentityStep({ onChange, onNextClick }) {
     let a = ethers.BigNumber.from(publicid).toString();
     console.log("identitycommitment", a);
 
-    window.localStorage.setItem("identitycommitment", identitynew.toString());
-    onChange(identitynew);
+    window.localStorage.setItem("identitycommitment", identitynew);
   };
 
   return (
     <div>
-      <div style={{ border: "2px solid black", padding: 10, margin: 10 }}>
-        <h3>What is semaphore?</h3>
-        <p>
-          Semaphore is a zero-knowledge protocol that allows users to prove
-          their membership in a group and send signals such as votes or
-          endorsements without revealing their identity. Additionally, it
-          provides a simple mechanism to prevent double-signaling.
-        </p>
-      </div>
       <div>
-        <h2>Identities</h2>
-        <p>To vote anonymously , you need to generate a unique identity.</p>
+        <h2 className="flex justify-center text-2xl">Get Your Identity</h2>
 
-        <div style={{ margin: 10, padding: 10 }}>
+        <div className=" flex justify-center">
           <Button
+            className="mr-6 m-6"
             onClick={async () => {
               await checkidentity();
             }}
           >
-            Load Existing
+            Load Existing Identity
+          </Button>
+          <Button
+            className="ml-6 m-6"
+            onClick={async () => {
+              CreateNewidentity();
+            }}
+          >
+            Create Identity
           </Button>
         </div>
-        <h3>New identity Generate </h3>
-
-        {identity ? (
-          <ul>
-            {identity && (
-              <li>
-                Trapdoor: {""}
+        <div className="box-sizing border-2 border-black p-2 ">
+          {identity && (
+            <ul>
+              <li className="">
+                <p className="font-bold">Trapdoor: {""}</p>
                 {identity ? identity.getTrapdoor().toString() : ""}{" "}
                 <b>Don&apos;t share this </b>
                 <Button
@@ -77,14 +72,13 @@ export default function IdentityStep({ onChange, onNextClick }) {
                     copyToClipboard(identity.getTrapdoor().toString());
                   }}
                 >
-                  Copy
+                  <CopyIcon />
                 </Button>
                 {Copied}
               </li>
-            )}
-            {identity && (
+
               <li>
-                Nullifier:{""}
+                <p className="font-bold">Nullifier:{""}</p>
                 {identity ? identity.getNullifier().toString() : ""}{" "}
                 <b>Don&apos;t Share this </b>
                 <Button
@@ -92,14 +86,13 @@ export default function IdentityStep({ onChange, onNextClick }) {
                     copyToClipboard(identity.getNullifier().toString());
                   }}
                 >
-                  Copy
+                  <CopyIcon />
                 </Button>
                 {Copied}
               </li>
-            )}
-            {identity && (
+
               <li>
-                Commitment:{""}
+                <p className="font-bold">Commitment:{""}</p>
                 {identity ? identity.generateCommitment().toString() : ""}{" "}
                 <b> This is your public ID</b>{" "}
                 <b>
@@ -108,31 +101,14 @@ export default function IdentityStep({ onChange, onNextClick }) {
                       copyToClipboard(identity.generateCommitment().toString());
                     }}
                   >
-                    Copy
+                    <CopyIcon />
                   </Button>
                   {Copied}
                 </b>
               </li>
-            )}
-          </ul>
-        ) : (
-          <div style={{ padding: 10, margin: 10 }}>
-            <Button
-              onClick={async () => {
-                CreateNewidentity();
-              }}
-            >
-              Create Identity
-            </Button>
-          </div>
-        )}
-        <Button
-          onClick={() => {
-            onNextClick();
-          }}
-        >
-          Next{" "}
-        </Button>
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );

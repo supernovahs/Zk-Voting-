@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router';
 import Identity from "./Identity";
 import NewVote from "./NewVote";
-
+import Header from "../components/Header";
 import abi from "../helpers/ZkVote.json";
 import {useContract,useSigner} from 'wagmi';
 import { Input } from '@chakra-ui/react';
@@ -27,15 +27,13 @@ const Home: NextPage = () => {
   return (
     <>
     <div className={styles.container}>
+    <Header/>
       
-      <main style = {{}}>
-        <ConnectButton />
-      </main>
       <div className = {styles.main}>
       <Identity></Identity>
       <div>
 
-        <button
+        {/* <button
       type="button"
       onClick={() => {
         router.push({
@@ -45,19 +43,19 @@ const Home: NextPage = () => {
       }}
     >
       New Proposal
-    </button>
+    </button> */}
         <div>
           
-        <Input
+        {/* <Input
         placeholder='Group Id you want to vote'
         value = {Id}
         onChange = {(e) => SetId(e.target.value)}
-        />
+        /> */}
         </div>
 
-        <Link href= {"Vote/" + Id} >
+        {/* <Link href= {"Vote/" + Id} >
           <a>Blog Post</a>
-        </Link>
+        </Link> */}
  
     </div>
 
