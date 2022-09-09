@@ -19,6 +19,7 @@
     "@semaphore-protocol/proof": "^2.2.0",
     "@walletconnect/qrcode-modal": "^1.8.0",
     "antd": "^4.22.3",
+    "autoprefixer": "^10.4.8",
     "axios": "^0.27.2",
     "bignumber.js": "^9.0.2",
     "ethers": "^5.0.0",
