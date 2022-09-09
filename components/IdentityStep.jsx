@@ -3,11 +3,15 @@ import { Identity } from "@semaphore-protocol/identity";
 import { Button, Input } from "@chakra-ui/react";
 import { useEnsResolver } from "wagmi";
 import copy from "copy-to-clipboard";
+import { IconButton } from "@chakra-ui/react";
 import { CopyIcon } from "@chakra-ui/icons";
 const { ethers } = require("ethers");
 export default function IdentityStep({}) {
   const [identity, setIdentity] = useState("");
-  const [Copied, SetCopied] = useState("");
+  const [TrapdoorCopied, SetTrapdoorCopied] = useState(false);
+  const [NullifierCopied, SetNullifierCopied] = useState(false);
+  const [CommitmentCopied, SetCommitmentCopied] = useState(false);
+
   async function checkidentity() {
     const identityval = window.localStorage.getItem("identitycommitment");
     console.log("identityval", identityval);
@@ -67,28 +71,30 @@ export default function IdentityStep({}) {
                 <p className="font-bold">Trapdoor: {""}</p>
                 {identity ? identity.getTrapdoor().toString() : ""}{" "}
                 <b>Don&apos;t share this </b>
-                <Button
+                <IconButton
                   onClick={() => {
+                    SetTrapdoorCopied(true);
                     copyToClipboard(identity.getTrapdoor().toString());
                   }}
-                >
-                  <CopyIcon />
-                </Button>
-                {Copied}
+                  colorScheme={TrapdoorCopied ? "green" : "blue"}
+                  aria-label="Search database"
+                  icon={<CopyIcon />}
+                />
               </li>
 
               <li>
                 <p className="font-bold">Nullifier:{""}</p>
                 {identity ? identity.getNullifier().toString() : ""}{" "}
                 <b>Don&apos;t Share this </b>
-                <Button
+                <IconButton
                   onClick={() => {
-                    copyToClipboard(identity.getNullifier().toString());
+                    copyToClipboard(identity.getTrapdoor().toString());
+                    SetNullifierCopied(true);
                   }}
-                >
-                  <CopyIcon />
-                </Button>
-                {Copied}
+                  colorScheme={NullifierCopied ? "green" : "blue"}
+                  aria-label="Search database"
+                  icon={<CopyIcon />}
+                />
               </li>
 
               <li>
@@ -96,14 +102,15 @@ export default function IdentityStep({}) {
                 {identity ? identity.generateCommitment().toString() : ""}{" "}
                 <b> This is your public ID</b>{" "}
                 <b>
-                  <Button
+                  <IconButton
                     onClick={() => {
-                      copyToClipboard(identity.generateCommitment().toString());
+                      copyToClipboard(identity.getTrapdoor().toString());
+                      SetCommitmentCopied(true);
                     }}
-                  >
-                    <CopyIcon />
-                  </Button>
-                  {Copied}
+                    colorScheme={CommitmentCopied ? "green" : "blue"}
+                    aria-label="Search database"
+                    icon={<CopyIcon />}
+                  />
                 </b>
               </li>
             </ul>
