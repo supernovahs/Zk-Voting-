@@ -90,128 +90,119 @@ export default function GroupStep({
     }
   };
 
-  // const UpdateCoordinator = (value) => {
-  //   SetCoordinator(value);
-  //   if (isENS(Coordinator)) {
-  //     let previous = value;
-  //     SetCoordinator(getEnsAddress(Coordinator));
-  //     console.log("ensresolve", getEnsAddress(Coordinator));
-  //     if (!ethers.utils.isAddress(Coordinator)) {
-  //       alert("Invalid ENS Name");
-  //       SetCoordinator("");
-  //     }
-  //   } else {
-  //     ethers.utils.isAddress(value) && SetCoordinator(value);
-  //   }
-  // };
+  const CreateProposal = async () => {
+    let proposals = [...Proposals];
+
+    const newproposals = proposals.map((val, index) => {
+      if (val.length < 32) {
+        console.log("Index", index, val);
+        console.log(
+          "proposal in bytes ",
+          ethers.utils.formatBytes32String(val)
+        );
+        return ethers.utils.formatBytes32String(val);
+      }
+      return val;
+    });
+    SetProposals(newproposals);
+    console.log(
+      "event in bytes",
+      ethers.utils.formatBytes32String(NewEventName)
+    );
+    console.log(
+      "Event Description",
+      "newproposals",
+      "coordinator",
+      NewEventDescription,
+      newproposals,
+      Coordinator
+    );
+
+    await contract.NewVoteInstance(
+      ethers.utils.formatBytes32String(NewEventName),
+      NewEventDescription,
+      newproposals,
+      Coordinator,
+      20,
+      0
+    );
+  };
 
   return (
-    <div>
-      <Link href="/">Back</Link>
-      <h2>Groups</h2>
-      <Button
+    <div className="border-4 border-black  flex-col justify-center m-2 p-2  ">
+      <h2 className="flex justify-center text-3xl mt-4">
+        Create a New Proposal
+      </h2>
+      {/* <Button
         onClick={async () => {
           getEvents().then(Setevents);
         }}
       >
         Refresh
-      </Button>
-      <div>
+      </Button> */}
+      <div className="flex justify-center  ">
         <div>
-          <div
-            style={{
-              border: "2px solid black",
-              padding: 10,
-              width: 450,
-              marginLeft: 50,
-            }}
-          >
-            <h2>New Proposal</h2>
+          <div className=" mb-4 w-80">
             <Input
-              placeholder="Enter proposal Name"
+              placeholder="Enter Vote proposal Name"
               value={NewEventName}
               onChange={(e) => SetNewEventName(e.target.value)}
             />
+          </div>
+          <div className=" mb-4 w-80">
             <Input
-              placeholder="Enter Description"
+              placeholder="Enter Description of Voting "
               value={NewEventDescription}
               onChange={(e) => SetNewEventDescription(e.target.value)}
             />
-            <div>
-              {Proposals.map((proposal, index) => (
-                <div key={index} style={{ display: "flex", gap: "1rem" }}>
-                  <Input
-                    placeholder="Enter proposal name"
-                    value={proposal}
-                    onChange={(e) => updateProposals(e.target.value, index)}
-                  />
-                  {index > 0 && (
-                    <Button
-                      onClick={() => {
-                        RemoveProposals(index);
-                      }}
-                    >
-                      <DeleteOutlined />
-                    </Button>
-                  )}
-                </div>
-              ))}
-              <Button
-                onClick={() => {
-                  AddProposals();
-                }}
-              >
-                <PlusOutlined />
-              </Button>
+          </div>
+
+          <div className="   p-2">
+            {Proposals.map((proposal, index) => (
+              <div key={index} className="border-red-300 w-80">
+                <Input
+                  className="p-2 mb-2 "
+                  placeholder="Enter proposal name"
+                  value={proposal}
+                  onChange={(e) => updateProposals(e.target.value, index)}
+                />
+                {index > 0 && (
+                  <Button
+                    onClick={() => {
+                      RemoveProposals(index);
+                    }}
+                  >
+                    <DeleteOutlined />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              onClick={() => {
+                AddProposals();
+              }}
+            >
+              <PlusOutlined />
+            </Button>
+            <div className="w-80 mb-2 ">
               <Input
+                className=" mb-4 p-2 "
                 placeholder="Coordinator"
                 value={Coordinator}
                 onChange={(e) => SetCoordinator(e.target.value)}
               />
             </div>
-            <Button
-              onClick={async () => {
-                let proposals = [...Proposals];
-
-                const newproposals = proposals.map((val, index) => {
-                  if (val.length < 32) {
-                    console.log("Index", index, val);
-                    console.log(
-                      "proposal in bytes ",
-                      ethers.utils.formatBytes32String(val)
-                    );
-                    return ethers.utils.formatBytes32String(val);
-                  }
-                  return val;
-                });
-                SetProposals(newproposals);
-                console.log(
-                  "event in bytes",
-                  ethers.utils.formatBytes32String(NewEventName)
-                );
-                console.log(
-                  "Event Description",
-                  "newproposals",
-                  "coordinator",
-                  NewEventDescription,
-                  newproposals,
-                  Coordinator
-                );
-
-                await contract.NewVoteInstance(
-                  ethers.utils.formatBytes32String(NewEventName),
-                  NewEventDescription,
-                  newproposals,
-                  Coordinator,
-                  20,
-                  0
-                );
-              }}
-            >
-              Create Proposal
-            </Button>
           </div>
-          <div>
+          <Button
+            className="hover:bg-indigo-600"
+            onClick={async () => {
+              await CreateProposal();
+            }}
+          >
+            Create Proposal
+          </Button>
+
+          {/* <div>
             {Events &&
               Events.map((value, i) => {
                 console.log("value", value.groupId, "index", i);
@@ -225,12 +216,7 @@ export default function GroupStep({
 
                 for (let i = 0; i < members.length; i++) {
                   console.log("checking if member");
-                  console.log(
-                    "members",
-                    members[i],
-                    "identitycommitment",
-                    identitycommitment
-                  );
+
                   if (
                     members[i] ==
                     identitycommitment.generateCommitment().toString()
@@ -287,7 +273,7 @@ export default function GroupStep({
                   </div>
                 );
               })}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

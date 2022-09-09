@@ -21,13 +21,11 @@ const Home: NextPage = () => {
   const [Id,SetId] = useState();
   const contract = new ethers.Contract(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,abi.abi,signer);
   const mainnetprovider = new ethers.providers.JsonRpcProvider("https://eth-mainnet.g.alchemy.com/v2/gDhsVUBEe61W2Q0w40A7Jwr3ZVyJ_Mvo");
-
-
-
+  
   return (
     <>
     <div className={styles.container}>
-    <Header/>
+    
       
       <div className = {styles.main}>
       <Identity></Identity>

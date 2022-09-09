@@ -77,7 +77,7 @@ export default function IdentityStep({}) {
                     copyToClipboard(identity.getTrapdoor().toString());
                   }}
                   colorScheme={TrapdoorCopied ? "green" : "blue"}
-                  aria-label="Search database"
+                  aria-label="Copy Trapdoor"
                   icon={<CopyIcon />}
                 />
               </li>
@@ -92,7 +92,7 @@ export default function IdentityStep({}) {
                     SetNullifierCopied(true);
                   }}
                   colorScheme={NullifierCopied ? "green" : "blue"}
-                  aria-label="Search database"
+                  aria-label="Copy Nullifier"
                   icon={<CopyIcon />}
                 />
               </li>
@@ -108,7 +108,7 @@ export default function IdentityStep({}) {
                       SetCommitmentCopied(true);
                     }}
                     colorScheme={CommitmentCopied ? "green" : "blue"}
-                    aria-label="Search database"
+                    aria-label="Copy Commitment"
                     icon={<CopyIcon />}
                   />
                 </b>
