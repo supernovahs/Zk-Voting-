@@ -6,7 +6,7 @@ export default function Navigation() {
   const menus = [
     { tabName: "Identity", pageName: "/" },
     { tabName: "New Proposal", pageName: "/NewVote" },
-    { tabName: "Active Proposals", pageName: "/activeproposals" },
+    { tabName: "Active Proposals", pageName: "/Activeproposals" },
     { tabName: "Vote", pageName: "/SelectId" },
   ];
   const { pathName } = useRouter();

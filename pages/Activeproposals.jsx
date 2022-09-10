@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useSigner } from "wagmi";
 const ethers = require("ethers");
 
-export default function activeproposals() {
+export default function Activeproposals() {
   const { data: signer, isError, isLoading } = useSigner();
   const [Events, Setevents] = useState();
   const [NewVoter, SetNewVoter] = useState();
