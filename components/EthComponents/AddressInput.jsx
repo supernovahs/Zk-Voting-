@@ -1,7 +1,7 @@
 import { Input } from "@chakra-ui/react";
 import React, { useCallback, useState } from "react";
 import { ethers } from "ethers";
-import { useLookupAddress } from "eth-hooks/dapps/ens";
+import { useEnsResolver } from "wagmi";
 
 import Blockie from "./Blockie";
 
@@ -37,10 +37,16 @@ const isENS = (address = "") =>
 export default function AddressInput(props) {
   const { ensProvider, onChange } = props;
   const [value, setValue] = useState(props.value);
-  const [scan, setScan] = useState(false);
-
   const currentValue = typeof props.value !== "undefined" ? props.value : value;
-  const ens = useLookupAddress(props.ensProvider, currentValue);
+  let ens;
+  try {
+    const { data, isError, isLoading } = useEnsResolver({
+      name: props.value,
+    });
+    ens = JSON.stringify(data);
+  } catch (e) {
+    console.log("error in ens resolve", e);
+  }
 
   const updateAddress = useCallback(
     async (newValue) => {
