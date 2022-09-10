@@ -10,7 +10,6 @@ export default function Navigation() {
     { tabName: "Vote", pageName: "/SelectId" },
   ];
   const { pathName } = useRouter();
-  console.log("pathname", pathName);
 
   return (
     <>

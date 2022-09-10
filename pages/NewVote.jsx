@@ -3,8 +3,6 @@ import { useSigner } from "wagmi";
 import abi from "../helpers/ZkVote.json";
 import GroupStep from "../components/GroupStep";
 import { Identity } from "@semaphore-protocol/identity";
-import { get } from "http";
-import { useRouter } from "next/router";
 const { ethers } = require("ethers");
 
 export default function NewVote({}) {
@@ -12,7 +10,6 @@ export default function NewVote({}) {
   const [Contract, SetContract] = useState();
   const [Mainnetprovider, SetMainnetprovider] = useState();
   const { data: signer, isError, isLoading } = useSigner();
-  console.log("signer", signer);
   useEffect(() => {
     const getidentity = async () => {
       const identitycommitment =

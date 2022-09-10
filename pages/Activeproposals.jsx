@@ -32,8 +32,7 @@ export default function Activeproposals() {
     const members = await contract.queryFilter(contract.filters.MemberAdded());
     const start = await contract.queryFilter(contract.filters.VoteStarts());
     const end = await contract.queryFilter(contract.filters.VoteEnds());
-    console.log("events", events);
-    console.log("members", members);
+
     return events.map((e) => ({
       groupId: e.args[0],
       eventName: e.args[1],
@@ -51,7 +50,6 @@ export default function Activeproposals() {
     async function updateevents() {
       const events = await getEvents();
       Setevents(events);
-      console.log("events", events);
     }
     updateevents();
   }, []);
@@ -60,24 +58,19 @@ export default function Activeproposals() {
     <div>
       {Events &&
         Events.map((value, i) => {
-          console.log("value", value.groupId, "index", i);
           let name = ethers.utils.parseBytes32String(value.eventName);
           let id = ethers.BigNumber.from(value.groupId).toString();
           let members = value.members;
-          console.log("Mem", members);
           let isMember = false;
           let des = value.description;
           let admin = value.coordinator;
 
           for (let i = 0; i < members.length; i++) {
-            console.log("checking if member");
-
             if (members[i] == _identity.generateCommitment().toString()) {
               console.log("is Member");
               isMember = true;
             }
           }
-          let currentstatus = "Created";
           console.log("value start ", value.start);
 
           let status =

@@ -29,8 +29,7 @@ export default function GroupStep({
     const mainnetprovider = new ethers.providers.JsonRpcProvider(
       process.env.NEXT_PUBLIC_ETH_MAINNET_API
     );
-    console.log("events", events);
-    console.log("members", members);
+
     return events.map((e) => ({
       groupId: e.args[0],
       eventName: e.args[1],
@@ -49,17 +48,14 @@ export default function GroupStep({
     async function updateevents() {
       const events = await getEvents();
       Setevents(events);
-      console.log("events", events);
     }
     updateevents();
   }, []);
 
   const updateProposals = (value, index) => {
-    console.log("value", value);
     let proposals = [...Proposals];
     proposals[index] = value;
     SetProposals(proposals);
-    console.log("proposals", Proposals);
   };
 
   const RemoveProposals = (index) => {
@@ -73,45 +69,17 @@ export default function GroupStep({
     SetProposals(newproposals);
   };
 
-  console.log("coordinator", Coordinator);
-  console.log("Events", Events);
-  const joinEvent = async (e) => {};
-
-  const SelectEvent = (e) => {
-    getEvents();
-    console.log("event cehck ", e);
-    onSelect(e);
-  };
-
-  const getEnsAddress = async (name) => {
-    let ensaddress = await mainnetprovider.resolveName(name);
-    console.log("ensaddress", ensaddress);
-    if (ensaddress) {
-      return ensaddress;
-    } else {
-      return null;
-    }
-  };
-
   const CreateProposal = async () => {
     let proposals = [...Proposals];
 
     const newproposals = proposals.map((val, index) => {
       if (val.length < 32) {
-        console.log("Index", index, val);
-        console.log(
-          "proposal in bytes ",
-          ethers.utils.formatBytes32String(val)
-        );
         return ethers.utils.formatBytes32String(val);
       }
       return val;
     });
     SetProposals(newproposals);
-    console.log(
-      "event in bytes",
-      ethers.utils.formatBytes32String(NewEventName)
-    );
+
     console.log(
       "Event Description",
       "newproposals",
@@ -136,13 +104,7 @@ export default function GroupStep({
       <h2 className="flex justify-center text-3xl mt-4">
         Create a New Proposal
       </h2>
-      <Button
-        onClick={async () => {
-          getEvents().then(Setevents);
-        }}
-      >
-        Refresh
-      </Button>
+
       <div className="flex justify-center  ">
         <div>
           <div className=" mb-4 w-80">
@@ -205,79 +167,6 @@ export default function GroupStep({
           >
             Create Proposal
           </Button>
-
-          <div>
-            {Events &&
-              Events.map((value, i) => {
-                console.log("value", value.groupId, "index", i);
-                let name = ethers.utils.parseBytes32String(value.eventName);
-                let id = ethers.BigNumber.from(value.groupId).toString();
-                let members = value.members;
-                console.log("Mem", members);
-                let isMember = false;
-                let des = value.description;
-                let admin = value.coordinator;
-
-                for (let i = 0; i < members.length; i++) {
-                  console.log("checking if member");
-
-                  if (
-                    members[i] ==
-                    identitycommitment.generateCommitment().toString()
-                  ) {
-                    console.log("is Member");
-                    isMember = true;
-                  }
-                }
-                let currentstatus = "Created";
-                console.log("value start ", value.start);
-
-                let status =
-                  value.start.length != 0
-                    ? (currentstatus = " Voting Started")
-                    : value.end.length != 0
-                    ? (currentstatus = "Voting Ended")
-                    : (currentstatus = "Created");
-                console.log("status", status);
-                let a = isMember ? "You are a member " : "Not Member";
-                return (
-                  <div
-                    style={{
-                      border: "2px solid black",
-                      margin: 10,
-                      padding: 10,
-                    }}
-                    key={id}
-                  >
-                    <p>EventName :{name}</p>
-                    <p>GroupId :{id}</p>
-                    <p>Description of Vote: {des}</p>
-                    <h2>{status}</h2>
-                    <Button disabled={true}>{a}</Button>
-                    <div style={{ padding: 10, margin: 7 }}>
-                      <Link href={"Vote/" + id}>Select</Link>
-                    </div>
-                    <Input
-                      placeholder="Add voter credentials"
-                      value={NewVoter}
-                      onChange={(e) => SetNewVoter(e.target.value)}
-                    />
-                    {signer._address == admin ? (
-                      <Button
-                        onClick={async () => {
-                          const tx = await contract.Addvoter(id, NewVoter);
-                          console.log("tx", tx);
-                        }}
-                      >
-                        Add Members
-                      </Button>
-                    ) : (
-                      <p>You are not Admin</p>
-                    )}
-                  </div>
-                );
-              })}
-          </div>
         </div>
       </div>
     </div>
