@@ -11,7 +11,6 @@ export default function GroupStep({
   contract,
   identitycommitment,
   onSelect,
-  onNextClick,
   mainnetprovider,
   signer,
 }) {

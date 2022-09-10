@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Input, Button } from "@chakra-ui/react";
 import { useRouter } from "next/router";
+import { useSigner } from "wagmi";
 export default function SelectId() {
+  const { data: signer, isError, isLoading } = useSigner();
   const [Id, SetId] = useState();
   const router = useRouter();
 
