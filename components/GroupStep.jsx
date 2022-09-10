@@ -3,6 +3,7 @@ import { useState, useCallBack, useEffect } from "react";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Button, Input } from "@chakra-ui/react";
 import Link from "next/link";
+import AddressInput from "./EthComponents/AddressInput";
 
 const { ethers } = require("ethers");
 
@@ -26,6 +27,9 @@ export default function GroupStep({
     const members = await contract.queryFilter(contract.filters.MemberAdded());
     const start = await contract.queryFilter(contract.filters.VoteStarts());
     const end = await contract.queryFilter(contract.filters.VoteEnds());
+    const mainnetprovider = new ethers.providers.JsonRpcProvider(
+      process.env.NEXT_PUBLIC_ETH_MAINNET_API
+    );
     console.log("events", events);
     console.log("members", members);
     return events.map((e) => ({
@@ -185,11 +189,12 @@ export default function GroupStep({
               <PlusOutlined />
             </Button>
             <div className="w-80 mb-2 ">
-              <Input
+              <AddressInput
                 className=" mb-4 p-2 "
                 placeholder="Coordinator"
                 value={Coordinator}
-                onChange={(e) => SetCoordinator(e.target.value)}
+                ensProvider={mainnetprovider}
+                onChange={(e) => SetCoordinator(e)}
               />
             </div>
           </div>
