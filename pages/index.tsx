@@ -26,34 +26,9 @@ const Home: NextPage = () => {
     <>
     <div className={styles.container}>
     
-      
       <div className = {styles.main}>
       <Identity></Identity>
       <div>
-
-        {/* <button
-      type="button"
-      onClick={() => {
-        router.push({
-          pathname: '/NewVote',
-          // query: { identity:  },
-        })
-      }}
-    >
-      New Proposal
-    </button> */}
-        <div>
-          
-        {/* <Input
-        placeholder='Group Id you want to vote'
-        value = {Id}
-        onChange = {(e) => SetId(e.target.value)}
-        /> */}
-        </div>
-
-        {/* <Link href= {"Vote/" + Id} >
-          <a>Blog Post</a>
-        </Link> */}
  
     </div>
 

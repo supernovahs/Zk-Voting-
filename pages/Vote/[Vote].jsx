@@ -14,31 +14,24 @@ export default function Vote() {
   const [_Identity, SetIdentity] = useState();
   const router = useRouter();
   const { Vote } = router.query;
+  console.log("Votes", Vote);
 
-  console.log("Vote", Vote);
   const contract = new ethers.Contract(
     process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
     abi.abi,
     signer
   );
-  const mainnetprovider = new ethers.providers.JsonRpcProvider(
-    "https://eth-mainnet.g.alchemy.com/v2/gDhsVUBEe61W2Q0w40A7Jwr3ZVyJ_Mvo"
-  );
-
+  console.log("contract", contract);
   useEffect(() => {
     const get = async () => {
-      SetMainnetprovider(mainnetprovider);
       const iden = window.localStorage.getItem("identitycommitment");
       if (iden) {
         const identity = new Identity(iden);
         SetIdentity(identity);
       }
       const event = await getEvents();
-      console.log("event", event);
-      console.log("signer", signer);
-      console.log("contract", contract);
-      console.log("identity", _Identity);
       SetEvents(event);
+      console.log("Eventss", Events);
     };
     get();
   }, []);
@@ -54,7 +47,6 @@ export default function Vote() {
     const pollstate = pollInstance.pollstate;
 
     if (pollstate == 0) {
-      console.log("Vote", Vote);
       const start = await contract.queryFilter(
         contract.filters.NewProposal(Vote)
       );

@@ -133,13 +133,13 @@ export default function GroupStep({
       <h2 className="flex justify-center text-3xl mt-4">
         Create a New Proposal
       </h2>
-      {/* <Button
+      <Button
         onClick={async () => {
           getEvents().then(Setevents);
         }}
       >
         Refresh
-      </Button> */}
+      </Button>
       <div className="flex justify-center  ">
         <div>
           <div className=" mb-4 w-80">
@@ -202,7 +202,7 @@ export default function GroupStep({
             Create Proposal
           </Button>
 
-          {/* <div>
+          <div>
             {Events &&
               Events.map((value, i) => {
                 console.log("value", value.groupId, "index", i);
@@ -273,7 +273,7 @@ export default function GroupStep({
                   </div>
                 );
               })}
-          </div> */}
+          </div>
         </div>
       </div>
     </div>

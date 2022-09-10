@@ -53,13 +53,6 @@ export default function ProofStep({
     "contract",
     contract
   );
-  // const getVotes = async () => {
-  //   console.log("eve", eve);
-  //   const votes = await contract.queryFilter(
-  //     contract.filters.CastedVote(eve[0].groupId)
-  //   );
-  //   return votes.map((e) => parseBytes32String(e.args[0]));
-  // };
 
   async function getEvents() {
     console.log("eve", eve);
@@ -150,9 +143,7 @@ export default function ProofStep({
 
     console.log("b", b);
     const mem = await getMembers();
-    // console.log("mem", mem);
     const group = new Group();
-    // console.log("Event data ", eve.members);
     group.addMembers(mem[0].members);
     console.log("group", group);
     const externalNullifier = ethers.BigNumber.from(group.root).toString();
@@ -164,7 +155,7 @@ export default function ProofStep({
       zkeyFilePath: "/semaphore.zkey",
       wasmFilePath: "/semaphore.wasm",
     });
-    console.log("fullProof", fullProof);
+    console.log("fullProoff", fullProof);
     let ps = fullProof.publicSignals;
     console.log("ps", ps);
     let hash = ps.nullifierHash;
@@ -225,13 +216,13 @@ export default function ProofStep({
           <h1>This id does not exist!!</h1>
         </div>
       ) : (
-        <div>
-          <Link href="/">Back</Link>
-
-          {eve && eve.groupId && (
-            <h2>Id: {ethers.BigNumber.from(eve.groupId).toString()}</h2>
+        <div className=" flex-col justify-center m-2 p-2 ">
+          {eve && (
+            <h2 className=" text-2xl">
+              Id: {ethers.BigNumber.from(eve[0].groupId).toString()}
+            </h2>
           )}
-          <h3>
+          <h3 className=" flex-col justify-center text-2xl bold w-80 m-2 p-2">
             {Votes &&
               Votes.map((val, index) => {
                 return (
@@ -239,19 +230,27 @@ export default function ProofStep({
                     {" "}
                     {ethers.utils.parseBytes32String(val.proposals)}:{" "}
                     {/* {ethers.BigNumber.from(val.votes).toString()} votes */}
-                    {
-                      <Input
-                        placeholder="Votes"
-                        value={Position[index]}
-                        onChange={(e) => updatePosition(index, e.target.value)}
-                      ></Input>
-                    }
+                    <div className="border-2 border-blue-500 ">
+                      {
+                        <Input
+                          placeholder="Votes"
+                          value={Position[index]}
+                          onChange={(e) =>
+                            updatePosition(index, e.target.value)
+                          }
+                        ></Input>
+                      }
+                    </div>
                   </div>
                 );
               })}
-            {<p>Remaining Votes: {RemainingVotes}</p>}
+            {
+              <p className="flex flex-col justify-center">
+                Remaining Votes: {RemainingVotes}
+              </p>
+            }
           </h3>
-          <div>
+          <div className="flex flex-col justify-center">
             <Button onClick={onOpen}>Vote</Button>
 
             <Modal isOpen={isOpen} onClose={onClose}>
@@ -295,7 +294,7 @@ export default function ProofStep({
           {
             <div>
               {EventData && EventData[0] && EventData[0].time != 0 ? (
-                <h2>
+                <h2 className=" text-2xl italic">
                   {" "}
                   Start Time:{" "}
                   {new Date(
@@ -303,14 +302,17 @@ export default function ProofStep({
                   ).toLocaleString()}{" "}
                 </h2>
               ) : (
-                <h2>Not Started</h2>
+                <h2 className="text-3xl">
+                  <b>Status: </b>Not Started
+                </h2>
               )}
             </div>
           }
 
           {signer._address === Coordinator ? (
-            <div>
+            <div className="bold text-2xl">
               <Button
+                className="bold text-2xl"
                 onClick={async () => {
                   await contract.StartPoll(
                     ethers.BigNumber.from(eve[0].groupId).toString()
@@ -323,12 +325,15 @@ export default function ProofStep({
           ) : (
             ""
           )}
-          <div style={{ border: "2px solid black ", margin: 5, padding: 7 }}>
-            <h3> Votes </h3>
+          <div className="border-2 border-green-600 ">
+            <h3 className="text-4xl flex justify-center ">
+              {" "}
+              Current Voting situation{" "}
+            </h3>
             {Votes &&
               Votes.map((val, index) => {
                 return (
-                  <div key={index}>
+                  <div key={index} className="text-3xl ">
                     {" "}
                     {ethers.utils.parseBytes32String(val.proposals)}:{" "}
                     <b>{ethers.BigNumber.from(val.votes).toString()}</b> votes
