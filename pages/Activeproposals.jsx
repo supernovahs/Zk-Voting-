@@ -64,13 +64,13 @@ export default function Activeproposals() {
           let isMember = false;
           let des = value.description;
           let admin = value.coordinator;
-
           for (let i = 0; i < members.length; i++) {
             if (members[i] == _identity.generateCommitment().toString()) {
               console.log("is Member");
               isMember = true;
             }
           }
+          let currentstatus = "Created";
           console.log("value start ", value.start);
 
           let status =

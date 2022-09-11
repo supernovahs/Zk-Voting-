@@ -44,8 +44,6 @@ export default function AddressInput(props) {
   });
   ens = JSON.stringify(data);
 
-  console.log("error in ens resolve", e);
-
   const updateAddress = useCallback(
     async (newValue) => {
       if (typeof newValue !== "undefined") {

@@ -2,7 +2,6 @@ import React from "react";
 import { useState, useCallBack, useEffect } from "react";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Button, Input } from "@chakra-ui/react";
-import Link from "next/link";
 import AddressInput from "./EthComponents/AddressInput";
 
 const { ethers } = require("ethers");
@@ -19,38 +18,37 @@ export default function GroupStep({
   const [NewEventDescription, SetNewEventDescription] = useState();
   const [Proposals, SetProposals] = useState([]);
   const [Coordinator, SetCoordinator] = useState();
-  const [NewVoter, SetNewVoter] = useState();
 
-  async function getEvents() {
-    const events = await contract.queryFilter(contract.filters.NewProposal());
-    const members = await contract.queryFilter(contract.filters.MemberAdded());
-    const start = await contract.queryFilter(contract.filters.VoteStarts());
-    const end = await contract.queryFilter(contract.filters.VoteEnds());
-    const mainnetprovider = new ethers.providers.JsonRpcProvider(
-      process.env.NEXT_PUBLIC_ETH_MAINNET_API
-    );
+  // async function getEvents() {
+  //   const events =
+  //     contract && (await contract.queryFilter(contract.filters.NewProposal()));
+  //   const members =
+  //     contract && (await contract.queryFilter(contract.filters.MemberAdded()));
+  //   const start =
+  //     contract && (await contract.queryFilter(contract.filters.VoteStarts()));
+  //   const end =
+  //     contract && (await contract.queryFilter(contract.filters.VoteEnds()));
 
-    return events.map((e) => ({
-      groupId: e.args[0],
-      eventName: e.args[1],
-      members: members
-        .filter((m) => m.args[0].eq(e.args[0]))
-        .map((m) => m.args[1].toString()),
-      coordinator: e.args[2],
-      description: e.args[3],
-      start: start.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
-      end: end.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
-    }));
-  }
-  console.log("Event call", getEvents());
+  //   return events.map((e) => ({
+  //     groupId: e.args[0],
+  //     eventName: e.args[1],
+  //     members: members
+  //       .filter((m) => m.args[0].eq(e.args[0]))
+  //       .map((m) => m.args[1].toString()),
+  //     coordinator: e.args[2],
+  //     description: e.args[3],
+  //     start: start.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
+  //     end: end.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
+  //   }));
+  // }
 
-  useEffect(() => {
-    async function updateevents() {
-      const events = await getEvents();
-      Setevents(events);
-    }
-    updateevents();
-  }, []);
+  // useEffect(() => {
+  //   async function updateevents() {
+  //     const events = await getEvents();
+  //     Setevents(events);
+  //   }
+  //   updateevents();
+  // }, [contract]);
 
   const updateProposals = (value, index) => {
     let proposals = [...Proposals];
@@ -79,15 +77,6 @@ export default function GroupStep({
       return val;
     });
     SetProposals(newproposals);
-
-    console.log(
-      "Event Description",
-      "newproposals",
-      "coordinator",
-      NewEventDescription,
-      newproposals,
-      Coordinator
-    );
 
     await contract.NewVoteInstance(
       ethers.utils.formatBytes32String(NewEventName),
