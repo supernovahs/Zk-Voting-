@@ -88,7 +88,7 @@ export default function IdentityStep({}) {
                 <b>Don&apos;t Share this </b>
                 <IconButton
                   onClick={() => {
-                    copyToClipboard(identity.getTrapdoor().toString());
+                    copyToClipboard(identity.getNullifier().toString());
                     SetNullifierCopied(true);
                   }}
                   colorScheme={NullifierCopied ? "green" : "blue"}
@@ -104,7 +104,7 @@ export default function IdentityStep({}) {
                 <b>
                   <IconButton
                     onClick={() => {
-                      copyToClipboard(identity.getTrapdoor().toString());
+                      copyToClipboard(identity.generateCommitment().toString());
                       SetCommitmentCopied(true);
                     }}
                     colorScheme={CommitmentCopied ? "green" : "blue"}

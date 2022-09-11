@@ -49,6 +49,7 @@ export default function Activeproposals() {
   useEffect(() => {
     async function updateevents() {
       const events = await getEvents();
+      console.log("events", events);
       Setevents(events);
     }
     updateevents();
@@ -65,13 +66,17 @@ export default function Activeproposals() {
           let des = value.description;
           let admin = value.coordinator;
           for (let i = 0; i < members.length; i++) {
+            console.log(
+              "members",
+              members[i],
+              "identity",
+              _identity.generateCommitment().toString()
+            );
             if (members[i] == _identity.generateCommitment().toString()) {
-              console.log("is Member");
               isMember = true;
             }
           }
           let currentstatus = "Created";
-          console.log("value start ", value.start);
 
           let status =
             value.start.length != 0
@@ -79,7 +84,6 @@ export default function Activeproposals() {
               : value.end.length != 0
               ? (currentstatus = "Voting Ended")
               : (currentstatus = "Created");
-          console.log("status", status);
           let a = isMember ? "You are a member " : "Not Member";
           return (
             <div className="border-2 border-black p-2 m-2" key={id}>
@@ -92,7 +96,7 @@ export default function Activeproposals() {
                 <Link href={"Vote/" + id}>Open</Link>
               </div>
 
-              {signer._address == admin ? (
+              {signer && signer._address == admin ? (
                 <div className="w-60">
                   <Input
                     placeholder="Add voter credentials"
@@ -101,7 +105,18 @@ export default function Activeproposals() {
                   />
                   <Button
                     onClick={async () => {
-                      const tx = await contract.Addvoter(id, NewVoter);
+                      if (!signer) {
+                        alert("Please connect Wallet");
+                      }
+                      const contractwithsigner = new ethers.Contract(
+                        process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+                        abi.abi,
+                        signer
+                      );
+                      const tx = await contractwithsigner.Addvoter(
+                        id,
+                        NewVoter
+                      );
                       console.log("tx", tx);
                     }}
                   >

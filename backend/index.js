@@ -33,7 +33,7 @@ app.post("/vote", async (req, res) => {
 
     catch (error) {
         console.log("error", error);
-        res.status(200).end();
+        res.status(400).end();
     }
 });
 

@@ -33,6 +33,7 @@ export default function ProofStep({
   const [NotEnoughVotes, SetNotEnoughVotes] = useState(false);
   const [Voting, SetVoting] = useState(false);
   const [Id, SetId] = useState();
+  const [UpdateVotes, SetUpdateVotes] = useState(false);
   let BACKEND_URL = "https://zkvotebackend.herokuapp.com/";
 
   console.log(
@@ -80,7 +81,7 @@ export default function ProofStep({
       }
     }
     updateEvents();
-  }, [eve]);
+  }, [eve, UpdateVotes]);
 
   useEffect(() => {
     if (eve == null) {
@@ -120,8 +121,6 @@ export default function ProofStep({
     const mem = await getMembers();
     const group = new Group();
     group.addMembers(mem[0].members);
-    const externalNullifier = ethers.BigNumber.from(group.root).toString();
-
     let id = ethers.BigNumber.from(eve[0].groupId).toString();
     const fullProof = await generateProof(identitycommitment, group, id, b[0], {
       zkeyFilePath: "/semaphore.zkey",
@@ -147,6 +146,9 @@ export default function ProofStep({
         }),
       });
       SetVoting(false);
+      if (status == 200) {
+        SetUpdateVotes(!UpdateVotes);
+      }
 
       console.log("status", status);
       console.log("adf");
@@ -188,7 +190,6 @@ export default function ProofStep({
                   <div key={index}>
                     {" "}
                     {ethers.utils.parseBytes32String(val.proposals)}:{" "}
-                    {/* {ethers.BigNumber.from(val.votes).toString()} votes */}
                     <div className="border-2 border-blue-500 ">
                       {
                         <Input
