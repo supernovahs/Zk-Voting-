@@ -39,14 +39,12 @@ export default function AddressInput(props) {
   const [value, setValue] = useState(props.value);
   const currentValue = typeof props.value !== "undefined" ? props.value : value;
   let ens;
-  try {
-    const { data, isError, isLoading } = useEnsResolver({
-      name: props.value,
-    });
-    ens = JSON.stringify(data);
-  } catch (e) {
-    console.log("error in ens resolve", e);
-  }
+  const { data, isError, isLoading } = useEnsResolver({
+    name: props.value,
+  });
+  ens = JSON.stringify(data);
+
+  console.log("error in ens resolve", e);
 
   const updateAddress = useCallback(
     async (newValue) => {

@@ -71,7 +71,6 @@ export default function ProofStep({
           ethers.BigNumber.from(eve[0].groupId).toString()
         );
         const coordinator = pollInstance.coordinator;
-        const pollstate = pollInstance.pollstate;
         SetCoordinator(coordinator);
         SetId(ethers.BigNumber.from(eve[0].groupId).toString());
         let z = await contract.getlatestVotes(
@@ -81,7 +80,7 @@ export default function ProofStep({
       }
     }
     updateEvents();
-  }, [signer]);
+  }, [eve]);
 
   useEffect(() => {
     if (eve == null) {
