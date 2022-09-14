@@ -49,7 +49,6 @@ export default function IdentityStep({}) {
     const publicid = identitynew.generateCommitment();
     let a = ethers.BigNumber.from(publicid).toString();
     console.log("identitycommitment", a);
-
     window.localStorage.setItem("identitycommitment", identitynew);
   };
 
