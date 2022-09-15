@@ -70,9 +70,9 @@ export default function Activeproposals() {
               "members",
               members[i],
               "identity",
-              _identity.generateCommitment().toString()
+              _identity?.generateCommitment().toString()
             );
-            if (members[i] == _identity.generateCommitment().toString()) {
+            if (members[i] == _identity?.generateCommitment().toString()) {
               isMember = true;
             }
           }
