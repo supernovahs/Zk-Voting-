@@ -287,7 +287,7 @@ export default function ProofStep({
           }
           <div>
           <h2 className="text-2xl">
-               {EndTime !=0  ? <p>End time in Unix:{EndTime}</p> : <p>"Not Started"</p>}
+               {EndTime !=0  ? <p>End time in Unix:{EndTime}</p> : <p>&quot;Not Started&quot;</p>}
               </h2>
           </div>
 
