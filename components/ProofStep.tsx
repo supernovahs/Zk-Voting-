@@ -3,6 +3,10 @@ import { useState } from "react";
 const { Group } = require("@semaphore-protocol/group");
 import { Button, Input } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
+import { useCallback } from 'react';
+import Datetime from 'react-datetime';
+import "react-datetime/css/react-datetime.css";
+
 import {
   Modal,
   ModalOverlay,
@@ -23,6 +27,9 @@ export default function ProofStep({
   contract,
   signer,
 }) {
+
+
+  const [date, Setdate] = useState (new Date());
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [Votes, SetVotes] = useState();
   const [EventData, SetEventData] = useState();
@@ -34,21 +41,15 @@ export default function ProofStep({
   const [Voting, SetVoting] = useState(false);
   const [Id, SetId] = useState();
   const [UpdateVotes, SetUpdateVotes] = useState(false);
-  let BACKEND_URL = "https://zkvotebackend.herokuapp.com/";
+  const [EndTime,SetEndTime] = useState();
+  let BACKEND_URL = 'https://zkvotebackend.herokuapp.com/';
 
-  console.log(
-    "eve",
-    eve,
-    "identitycommitment",
-    identitycommitment,
-    "signer",
-    signer,
-    "contract",
-    contract
-  );
+  const getEvents = useCallback(async () => {
+    if (!contract || !eve || eve?.length === 0) {
+      return [];
+    }
 
-  async function getEvents() {
-    console.log("eve", eve);
+    console.log('eve', eve);
     const start = await contract.queryFilter(
       contract.filters.VoteStarts(eve[0].groupId)
     );
@@ -58,11 +59,11 @@ export default function ProofStep({
       groupId: e.args[0],
       time: e.args[1],
     }));
-  }
+  }, [contract, eve]);
 
   useEffect(() => {
     async function updateEvents() {
-      if (eve == 0) {
+      if (eve == 0 || !eve || eve?.length === 0 || !contract) {
         return null;
       } else {
         const events = await getEvents();
@@ -73,6 +74,8 @@ export default function ProofStep({
         );
         const coordinator = pollInstance.coordinator;
         SetCoordinator(coordinator);
+        const endtime  = pollInstance.endtime;
+        SetEndTime(ethers.BigNumber.from(endtime).toString());
         SetId(ethers.BigNumber.from(eve[0].groupId).toString());
         let z = await contract.getlatestVotes(
           ethers.BigNumber.from(eve[0].groupId).toString()
@@ -81,7 +84,7 @@ export default function ProofStep({
       }
     }
     updateEvents();
-  }, [eve, UpdateVotes]);
+  }, [eve, UpdateVotes, getEvents, contract]);
 
   useEffect(() => {
     if (eve == null) {
@@ -89,15 +92,19 @@ export default function ProofStep({
     } else {
       let a = [];
       Votes &&
-        Votes.map((val, index) => {
+      Votes.map((val, index) => {
+        console.log("val",val);
           a[index] = val.proposals;
         });
       SetProposals(a);
-      console.log("a", a);
+      console.log('a', a);
     }
-  }, [Votes]);
+  }, [Votes, eve]);
 
   const getMembers = async () => {
+    if (!contract) {
+      return [];
+    }
     const events = await contract.queryFilter(
       contract.filters.NewProposal(eve[0].groupId)
     );
@@ -169,6 +176,15 @@ export default function ProofStep({
       SetNotEnoughVotes(true);
     }
   };
+  const handleChange = (newValue) => {
+    let time =(new Date(newValue).getTime()/1000).toFixed(0);
+    Setdate(time);
+    console.log("Date",time);
+  };
+
+  const Unixtotime = (time) =>{
+    return (new Date(time *1000));
+  }
 
   return (
     <div>
@@ -220,7 +236,7 @@ export default function ProofStep({
                 <ModalCloseButton />
                 <ModalBody>
                   {Votes &&
-                    Votes.map((val, index) => {
+                    Votes.map<[] | null>((val:string | null, index:number) => {
                       return (
                         <div key={index}>
                           {ethers.utils.parseBytes32String(val.proposals)}:{" "}
@@ -253,6 +269,7 @@ export default function ProofStep({
           </div>
           {
             <div>
+             
               {EventData && EventData[0] && EventData[0].time != 0 ? (
                 <h2 className=" text-2xl italic">
                   {" "}
@@ -268,19 +285,48 @@ export default function ProofStep({
               )}
             </div>
           }
+          <div>
+          <h2 className="text-2xl">
+               {EndTime !=0  ? <p>End time in Unix:{EndTime}</p> : <p>"Not Started"</p>}
+              </h2>
+          </div>
 
           {signer._address === Coordinator ? (
             <div className="bold text-2xl">
-              <Button
-                className="bold text-2xl"
-                onClick={async () => {
-                  await contract.StartPoll(
-                    ethers.BigNumber.from(eve[0].groupId).toString()
-                  );
-                }}
-              >
-                Start Poll
-              </Button>
+              <div className="">
+                 {/* <LocalizationProvider dateAdapter={AdapterMoment}> */}
+                      {/* <Stack spacing={3}> */}
+                  {/* <DateTimePicker
+                    label="Date&Time picker"
+                    value={date}
+                    onChange={ e =>handleChange(e)}
+                    renderInput={(params) => <TextField {...params} />}
+                  /> */}
+                    {/* </Stack> */}
+                {/* </LocalizationProvider> */}
+                {/* <DateTimePicker
+                  value = {date}
+                  onChange = {handleChange}
+                /> */}
+                <div>
+
+               <Datetime
+               value = {date}
+               onChange={handleChange}
+               />
+                </div>
+
+                <Button
+                  className="bold text-2xl"
+                  onClick={async () => {
+                    await contract.StartPoll(
+                      ethers.BigNumber.from(eve[0].groupId).toString(),date
+                    );
+                  }}
+                >
+                  Start Poll
+                </Button>
+              </div>
             </div>
           ) : (
             ""

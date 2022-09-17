@@ -31,7 +31,6 @@ export default function Activeproposals() {
     const events = await contract.queryFilter(contract.filters.NewProposal());
     const members = await contract.queryFilter(contract.filters.MemberAdded());
     const start = await contract.queryFilter(contract.filters.VoteStarts());
-    const end = await contract.queryFilter(contract.filters.VoteEnds());
 
     return events.map((e) => ({
       groupId: e.args[0],
@@ -42,7 +41,7 @@ export default function Activeproposals() {
       coordinator: e.args[2],
       description: e.args[3],
       start: start.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
-      end: end.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
+      end: start.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[2]),
     }));
   }
 
@@ -70,9 +69,9 @@ export default function Activeproposals() {
               "members",
               members[i],
               "identity",
-              _identity.generateCommitment().toString()
+              _identity?.generateCommitment().toString()
             );
-            if (members[i] == _identity.generateCommitment().toString()) {
+            if (members[i] == _identity?.generateCommitment().toString()) {
               isMember = true;
             }
           }
