@@ -31,6 +31,12 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
       uint  votes;
     }
 
+    struct ResultsandAddresses{
+      bytes32 proposals;
+      uint votes;
+      address IndividualGrantee;
+    }
+
     struct Poll{
       address coordinator;
       PollState pollstate;
@@ -38,7 +44,10 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
       bytes32 pollname;
       string description;
       bytes32[] proposals;
+      address[] grantees;
+      uint fund;
     }
+
 /***************************CUSTOM ERRORS *****************************/
     
   error ALREADY_STARTED();
@@ -48,6 +57,8 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
   error INVALID_TIMESTAMP();
   error NOT_ENOUGH_VOTES();
   error INVALID();
+  error VOTING_NOT_ENDED();
+  error VALUE_NOT_SENT();
 
 /// @dev Checks  if msg.sender == admin 
     modifier onlyAdmin(uint _pollId){
@@ -61,7 +72,6 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
   constructor(uint[] memory _depths,address[] memory _verifieraddresses) payable {
   if(_depths.length != _verifieraddresses.length){
   revert NOT_SAME_LENGTH();
-
   }
 
   uint depthlength = _depths.length;
@@ -77,8 +87,7 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
   function getproposals(uint _id) public view returns(bytes32[] memory ){
     return polls[_id].proposals;
   }
-
-  function NewVoteInstance(bytes32 _eventName,string memory _description,bytes32[] memory  _proposals,address  _coordinator,uint8 _depth,uint _zerovalue) public   {
+  function NewVoteInstance(bytes32 _eventName,string memory _description,bytes32[] memory  _proposals,address[] calldata _grantees,address  _coordinator,uint8 _depth,uint _zerovalue) public payable  {
     uint _pollId= hashEventName(_eventName);
     _createGroup(_pollId,_depth,_zerovalue);
     Poll memory poll;
@@ -87,10 +96,14 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
     poll.pollname = _eventName;
     poll.description = _description;
     poll.proposals = _proposals;
-    polls[_pollId]= poll;
+    bool addressInput = _grantees.length> 0 && _grantees.length == _proposals.length;
 
+    if(addressInput){
+      poll.grantees = _grantees;
+      poll.fund = msg.value;
+    }
+      polls[_pollId]= poll;
     emit NewProposal(_pollId,_eventName,_coordinator,_description);
-
   }
 
    function hashEventName(bytes32 eventId) internal pure returns (uint256) {
@@ -104,7 +117,7 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
     _addMember(_pollId,_identitycommitment);
 
   }   
-
+/// Get latest votes in case proposals does not include grantees addresses 
 /// @param _pollId Poll Id of the group 
 /// @dev No need for gas optimization as function is view.
 /// Returns Results Struct
@@ -112,7 +125,8 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
   function getlatestVotes(uint _pollId) public view returns(Results[] memory ){
     
     uint lengthofproposal =  polls[_pollId].proposals.length;
-
+  if(polls[_pollId].grantees.length ==0)
+  {
     Results[] memory results = new Results[](lengthofproposal);
 
     for(uint i=0 ;i<lengthofproposal;++i){
@@ -122,9 +136,31 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
         votes:VotesperProposal[_pollId][signal]
       });
     }
-
     return results;
+}
  
+  }
+
+  /// Get Votes in case Proposal includes grantees 
+  /// @param _pollId PollId of the Instance 
+  /// Returns ResultsandAddresses struct
+
+  function getLatestVotesWithGrantees(uint _pollId) public view returns (ResultsandAddresses[] memory){
+        uint lengthofproposal =  polls[_pollId].proposals.length;
+
+    ResultsandAddresses[] memory results = new ResultsandAddresses[](lengthofproposal);
+
+for(uint i=0 ;i<lengthofproposal;++i){
+      bytes32  signal = polls[_pollId].proposals[i];
+      address _grantee = polls[_pollId].grantees[i];
+      results[i] = ResultsandAddresses({
+        proposals: signal,
+        votes:VotesperProposal[_pollId][signal],
+        IndividualGrantee:_grantee
+      });
+    }
+    
+  return results;
   }
 
 /// @param _pollId  pollId of the Group
@@ -156,6 +192,42 @@ contract ZkVote is SemaphoreCore,SemaphoreGroups{
       poll.endtime = _endtime;
 
   emit VoteStarts(_pollId,uint64(block.timestamp),_endtime);
+  }
+
+
+  /// Disperse Funds to the grantees in ratio of vote
+  /// @param _pollId PollId of the group 
+  function disperse(uint _pollId) external {
+    uint i ;
+  uint length = polls[_pollId].grantees.length;
+  if(block.timestamp <polls[_pollId].endtime){
+    revert VOTING_NOT_ENDED();
+  }
+  
+  uint[] memory votes = new uint[](length);
+   ResultsandAddresses[] memory result = getLatestVotesWithGrantees(_pollId);
+   uint totalvotes;
+  for(;;){
+    i<length;
+    votes[i] = result[i].votes;
+    totalvotes+= result[i].votes;
+    unchecked{
+      ++i;
+    }
+  }
+  uint z ;
+  for(;;){
+    z < length;
+    (bool s , bytes memory r ) = result[z].IndividualGrantee.call{value:votes[z]/ totalvotes}("");
+    if(!s){
+      revert VALUE_NOT_SENT();
+    }
+    unchecked{
+      ++i;
+    }
+  }
+
+    
   }
 
 
