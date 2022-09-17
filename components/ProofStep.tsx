@@ -90,7 +90,7 @@ export default function ProofStep({
     if (eve == null) {
       return null;
     } else {
-      let a = [];
+      let a:[] = [];
       Votes &&
       Votes.map((val, index) => {
         console.log("val",val);
