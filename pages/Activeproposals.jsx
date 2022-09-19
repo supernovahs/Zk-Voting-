@@ -14,7 +14,7 @@ export default function Activeproposals() {
   const [_identity, _setidentity] = useState();
   async function getEvents() {
     const provider = new ethers.providers.JsonRpcProvider(
-      "https://eth-goerli.g.alchemy.com/v2/RcYr3KRxoKeP5zh3OSZ3uVVx00sOi-5R"
+      process.env.NEXT_PUBLIC_MUMBAI_API
     );
     const contract = new ethers.Contract(
       process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,

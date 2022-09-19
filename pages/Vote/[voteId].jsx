@@ -14,13 +14,27 @@ export default function Vote() {
   const [_Identity, SetIdentity] = useState();
   const router = useRouter();
   const { voteId } = router.query;
-
+  const provider = new ethers.providers.JsonRpcProvider(
+    process.env.NEXT_PUBLIC_MUMBAI_API
+  );
+  console.log("provider", provider);
+  console.log("signer", signer);
   const contract = useMemo(
     () =>
       new ethers.Contract(
         process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
         abi.abi,
         signer
+      ),
+    [signer]
+  );
+
+  const readcontract = useMemo(
+    () =>
+      new ethers.Contract(
+        process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+        abi.abi,
+        provider
       ),
     [signer]
   );

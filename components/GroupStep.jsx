@@ -19,37 +19,6 @@ export default function GroupStep({
   const [Proposals, SetProposals] = useState([]);
   const [Coordinator, SetCoordinator] = useState();
 
-  // async function getEvents() {
-  //   const events =
-  //     contract && (await contract.queryFilter(contract.filters.NewProposal()));
-  //   const members =
-  //     contract && (await contract.queryFilter(contract.filters.MemberAdded()));
-  //   const start =
-  //     contract && (await contract.queryFilter(contract.filters.VoteStarts()));
-  //   const end =
-  //     contract && (await contract.queryFilter(contract.filters.VoteEnds()));
-
-  //   return events.map((e) => ({
-  //     groupId: e.args[0],
-  //     eventName: e.args[1],
-  //     members: members
-  //       .filter((m) => m.args[0].eq(e.args[0]))
-  //       .map((m) => m.args[1].toString()),
-  //     coordinator: e.args[2],
-  //     description: e.args[3],
-  //     start: start.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
-  //     end: end.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
-  //   }));
-  // }
-
-  // useEffect(() => {
-  //   async function updateevents() {
-  //     const events = await getEvents();
-  //     Setevents(events);
-  //   }
-  //   updateevents();
-  // }, [contract]);
-
   const updateProposals = (value, index) => {
     let proposals = [...Proposals];
     proposals[index] = value;
@@ -82,6 +51,7 @@ export default function GroupStep({
       ethers.utils.formatBytes32String(NewEventName),
       NewEventDescription,
       newproposals,
+      [],
       Coordinator,
       20,
       0
