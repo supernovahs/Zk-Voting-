@@ -10,7 +10,7 @@ import Layout from "../components/Layout";
 
 const { chains, provider, webSocketProvider } = configureChains(
   [
-   chain.polygonMumbai
+   chain.goerli
   ],
   [
     alchemyProvider({

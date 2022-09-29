@@ -14,7 +14,7 @@ export default function Activeproposals() {
   const [_identity, _setidentity] = useState();
   async function getEvents() {
     const provider = new ethers.providers.JsonRpcProvider(
-      process.env.NEXT_PUBLIC_MUMBAI_API
+      process.env.NEXT_PUBLIC_GOERLI_API
     );
     const contract = new ethers.Contract(
       process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
@@ -83,7 +83,7 @@ export default function Activeproposals() {
               : value.end.length != 0
               ? (currentstatus = "Voting Ended")
               : (currentstatus = "Created");
-          let a = isMember ? "You are a member " : "Not Member";
+          let a = isMember ? "You are a member" : "Not Member";
           return (
             <div className="border-2 border-black p-2 m-2" key={id}>
               <p className="text-3xl font-bold">{name}</p>
