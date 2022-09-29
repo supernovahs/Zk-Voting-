@@ -140,7 +140,7 @@ export default function ProofStep({
       identitycommitment,
       group,
       id,
-      ethers.utils.keccak256(b[0]) >> 8,
+      keccak256(["address"], [b[0]]),
       {
         zkeyFilePath: "/semaphore.zkey",
         wasmFilePath: "/semaphore.wasm",
@@ -150,28 +150,29 @@ export default function ProofStep({
     let hash = ps.nullifierHash;
     const solidityProof = packToSolidityProof(fullProof.proof);
     let isvoted = await contract.nullifierHashes(hash);
-    // if (isvoted == true) {
-    //   alert("Already Voted ser");
-    //   SetVoting(false);
-    // } else {
-    //   const { status } = await fetch(`${BACKEND_URL}vote`, {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({
-    //       proposals,
-    //       position,
-    //       hash,
-    //       id,
-    //       solidityProof,
-    //     }),
-    //   });
-    //   SetVoting(false);
-    //   if (status == 200) {
-    //     SetUpdateVotes(!UpdateVotes);
-    //   }
+    if (isvoted == true) {
+      alert("Already Voted ser");
+      SetVoting(false);
+    } else {
+      const { status } = await fetch(`${BACKEND_URL}vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          proposals,
+          position,
+          hash,
+          id,
+          solidityProof,
+        }),
+      });
+      SetVoting(false);
+      if (status == 200) {
+        SetUpdateVotes(!UpdateVotes);
+      }
 
-    // console.log("status", status);
-    // console.log("adf");
+      console.log("status", status);
+      console.log("adf");
+    }
   };
 
   const updatePosition = (index, position) => {
@@ -340,9 +341,7 @@ export default function ProofStep({
                 return (
                   <div key={index} className="text-3xl ">
                     {" "}
-                    {ethers.BigNumber.from(
-                      val.IndividualGrantee
-                    ).toString()}:{" "}
+                    {val.IndividualGrantee}:{" "}
                     <b>{ethers.BigNumber.from(val.votes).toString()}</b> votes
                   </div>
                 );
