@@ -33,15 +33,15 @@ export default function IdentityStep({}) {
     copy(text);
   };
 
-  const CreateNewidentity = async () => {
-    const identitynew = new Identity();
-    setIdentity(identitynew);
-    const publicid = identitynew.generateCommitment();
-    let a = ethers.BigNumber.from(publicid).toString();
-    console.log("identitycommitment", a);
+  // const CreateNewidentity = async () => {
+  //   const identitynew = new Identity();
+  //   setIdentity(identitynew);
+  //   const publicid = identitynew.generateCommitment();
+  //   let a = ethers.BigNumber.from(publicid).toString();
+  //   console.log("identitycommitment", a);
 
-    window.localStorage.setItem("identitycommitment", identitynew);
-  };
+  //   window.localStorage.setItem("identitycommitment", identitynew);
+  // };
 
   const CreateDeterministicidentity = async (hash) => {
     const identitynew = new Identity(hash);
@@ -66,14 +66,14 @@ export default function IdentityStep({}) {
           >
             Load Existing Identity
           </Button>
-          <Button
+          {/* <Button
             className="ml-6 m-6"
             onClick={async () => {
               CreateNewidentity();
             }}
           >
             Create Burner Identity
-          </Button>
+          </Button> */}
 
           <div className="m-2 p-2 ">
             <Input
