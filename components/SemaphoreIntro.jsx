@@ -9,7 +9,7 @@ export default function SemaphoreIntro() {
       borderRadius={20}
       border={"1px solid rgba(255, 255, 255, 0.125)"}
       padding={"2.5rem"}
-      width={"70%"}
+      width={"50%"}
       margin={"auto"}
       boxShadow={"0 10px 10px -5px rgba(156, 255, 0, 0.7)"}
       mt={"70px"}

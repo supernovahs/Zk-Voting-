@@ -13,22 +13,24 @@ export default function Header() {
       alignItems={"center"}
       mx={5}
       bg={"black"}
+      zIndex={100}
+      borderBottom={"1px solid rgba(255, 255, 255, 0.125)"}
     >
       <Box py={5}>
         <Navigation />
       </Box>
       <Box flexGrow={1}>
         <Heading
-          color={"#9CFF00"}
+          color={"#fff"}
           _before={{
             content: '""',
-            borderBottom: "2px solid #9CFF00",
+            borderBottom: "2px solid #fff",
             flex: "1",
             margin: "auto 20px",
           }}
           _after={{
             content: '""',
-            borderBottom: "2px solid #9CFF00",
+            borderBottom: "2px solid #fff",
             flex: "1",
             margin: "auto 20px",
           }}

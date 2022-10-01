@@ -10,7 +10,8 @@ export default function Navigation() {
     { tabName: "ACTIVE PROPOSAL", pageName: "/Activeproposals" },
     { tabName: "VOTE", pageName: "/SelectId" },
   ];
-  const { pathName } = useRouter();
+  const { pathname } = useRouter();
+  console.log(pathname);
 
   return (
     <Box
@@ -36,6 +37,7 @@ export default function Navigation() {
               cursor: "pointer",
               // fontSize: "1.1rem",
             }}
+            color={pathname === tab.pageName ? "#9CFF00" : "white"}
           >
             {tab.tabName}
           </Text>
