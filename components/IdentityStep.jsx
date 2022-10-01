@@ -54,24 +54,17 @@ export default function IdentityStep({}) {
   };
 
   return (
-    <Box display={"flex"} mx={10} mt={20} gap={20}>
+    <Box display={"flex"} mx={10} my={20} gap={20}>
       <Box
         border={"1px solid rgba(255, 255, 255, 0.125)"}
         boxShadow={"0 10px 10px -5px rgba(156, 255, 0, 0.7)"}
         padding={"2.5rem"}
         borderRadius={20}
-        height={"100%"}
+        height={"inherit"}
         backgroundColor={"rgba(17, 25, 40, 0.88)"}
       >
         <Heading mb={5}>Get Your Identity</Heading>
-        <Button
-          mb={5}
-          onClick={async () => {
-            await checkidentity();
-          }}
-        >
-          Load Existing Identity
-        </Button>
+
         <Input
           mb={5}
           placeholder="Enter a secret message to generate Identity "
@@ -89,6 +82,14 @@ export default function IdentityStep({}) {
           }}
         >
           Create a Deterministic Identity
+        </Button>
+        <Button
+          ml={5}
+          onClick={async () => {
+            await checkidentity();
+          }}
+        >
+          Load Existing Identity
         </Button>
       </Box>
       <Box flexGrow={1}>
