@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Identity } from "@semaphore-protocol/identity";
-import { Button, Input } from "@chakra-ui/react";
+import { Box, Button, Heading, Input, Spinner, Text } from "@chakra-ui/react";
 import copy from "copy-to-clipboard";
 import { IconButton } from "@chakra-ui/react";
 import { CopyIcon } from "@chakra-ui/icons";
@@ -14,6 +14,7 @@ export default function IdentityStep({}) {
   const [NullifierCopied, SetNullifierCopied] = useState(false);
   const [CommitmentCopied, SetCommitmentCopied] = useState(false);
   const [SecretString, SetSecretString] = useState();
+  const [loading, setLoading] = useState(false);
   async function checkidentity() {
     const identityval = window.localStorage.getItem("identitycommitment");
     console.log("identityval", identityval);
@@ -51,6 +52,131 @@ export default function IdentityStep({}) {
     console.log("identitycommitment", a);
     window.localStorage.setItem("identitycommitment", identitynew);
   };
+
+  return (
+    <Box display={"flex"} mx={10} mt={20} gap={20}>
+      <Box
+        border={"1px solid rgba(255, 255, 255, 0.125)"}
+        boxShadow={"0 10px 10px -5px rgba(156, 255, 0, 0.7)"}
+        padding={"2.5rem"}
+        borderRadius={20}
+        height={"100%"}
+        backgroundColor={"rgba(17, 25, 40, 0.88)"}
+      >
+        <Heading mb={5}>Get Your Identity</Heading>
+        <Button
+          mb={5}
+          onClick={async () => {
+            await checkidentity();
+          }}
+        >
+          Load Existing Identity
+        </Button>
+        <Input
+          mb={5}
+          placeholder="Enter a secret message to generate Identity "
+          value={SecretString}
+          onChange={(e) => SetSecretString(e.target.value)}
+        />
+        <Button
+          disabled={!SecretString}
+          onClick={async () => {
+            setLoading(true);
+            const hash = await signer.signMessage(SecretString);
+            CreateDeterministicidentity(hash);
+            SetSecretString("");
+            setLoading(false);
+          }}
+        >
+          Create a Deterministic Identity
+        </Button>
+      </Box>
+      <Box flexGrow={1}>
+        {identity ? (
+          <Box
+            border={"1px solid rgba(255, 255, 255, 0.125)"}
+            boxShadow={"0 10px 10px -5px rgba(156, 255, 0, 0.7)"}
+            padding={"2.5rem"}
+            borderRadius={20}
+            height={"100%"}
+            backgroundColor={"rgba(17, 25, 40, 0.88)"}
+          >
+            <ul>
+              <Box mb={3} className="">
+                <p className="font-bold">
+                  Trapdoor (<b>Don&apos;t share this </b>) : {""}
+                </p>
+                {identity ? identity.getTrapdoor().toString() : ""}{" "}
+                <IconButton
+                  onClick={() => {
+                    SetTrapdoorCopied(true);
+                    copyToClipboard(identity.getTrapdoor().toString());
+                  }}
+                  colorScheme={TrapdoorCopied ? "green" : "blue"}
+                  aria-label="Copy Trapdoor"
+                  icon={<CopyIcon />}
+                />
+              </Box>
+
+              <Box mb={3}>
+                <p className="font-bold">
+                  Nullifier (<b>Don&apos;t Share this </b>) :{""}
+                </p>
+                {identity ? identity.getNullifier().toString() : ""}{" "}
+                <IconButton
+                  onClick={() => {
+                    copyToClipboard(identity.getNullifier().toString());
+                    SetNullifierCopied(true);
+                  }}
+                  colorScheme={NullifierCopied ? "green" : "blue"}
+                  aria-label="Copy Nullifier"
+                  icon={<CopyIcon />}
+                />
+              </Box>
+
+              <Box>
+                <p className="font-bold">
+                  Commitment (This is your Public ID) :{" "}
+                </p>
+                {identity ? identity.generateCommitment().toString() : " "}
+                {"  "}
+                {/* <b> This is your public ID</b>{" "} */}
+                <b>
+                  <IconButton
+                    onClick={() => {
+                      copyToClipboard(identity.generateCommitment().toString());
+                      SetCommitmentCopied(true);
+                    }}
+                    colorScheme={CommitmentCopied ? "green" : "blue"}
+                    aria-label="Copy Commitment"
+                    icon={<CopyIcon />}
+                  />
+                </b>
+              </Box>
+            </ul>
+          </Box>
+        ) : (
+          <Box
+            border={"1px solid rgba(255, 255, 255, 0.125)"}
+            boxShadow={"0 10px 10px -5px rgba(156, 255, 0, 0.7)"}
+            padding={"2.5rem"}
+            borderRadius={20}
+            height={"100%"}
+            backgroundColor={"rgba(17, 25, 40, 0.88)"}
+            display={"flex"}
+            justifyContent={"center"}
+            alignItems={"center"}
+          >
+            {loading ? (
+              <Spinner />
+            ) : (
+              <Text fontSize={"xl"}>Please Generate your Identity</Text>
+            )}
+          </Box>
+        )}
+      </Box>
+    </Box>
+  );
 
   return (
     <div>

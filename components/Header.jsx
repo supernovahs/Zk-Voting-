@@ -6,26 +6,29 @@ import { Box, Heading, Text } from "@chakra-ui/react";
 export default function Header() {
   return (
     <Box
+      position={"sticky"}
+      top={0}
       display={"flex"}
       justifyContent={"space-between"}
       alignItems={"center"}
       mx={5}
-      bg={"transparent"}
+      bg={"black"}
     >
       <Box py={5}>
         <Navigation />
       </Box>
       <Box flexGrow={1}>
         <Heading
+          color={"#9CFF00"}
           _before={{
             content: '""',
-            borderBottom: "2px solid white",
+            borderBottom: "2px solid #9CFF00",
             flex: "1",
             margin: "auto 20px",
           }}
           _after={{
             content: '""',
-            borderBottom: "2px solid white",
+            borderBottom: "2px solid #9CFF00",
             flex: "1",
             margin: "auto 20px",
           }}
