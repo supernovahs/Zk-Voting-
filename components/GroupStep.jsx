@@ -3,52 +3,28 @@ import { useState, useCallBack, useEffect } from "react";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Button, Input } from "@chakra-ui/react";
 import AddressInput from "./EthComponents/AddressInput";
+import { useSigner } from "wagmi";
+import abi from "../helpers/ZkVote.json";
 
 const { ethers } = require("ethers");
 
 export default function GroupStep({
-  contract,
   identitycommitment,
   onSelect,
   mainnetprovider,
   signer,
 }) {
+  // const { data: signer, isError, isLoading } = useSigner();
   const [Events, Setevents] = useState();
   const [NewEventName, SetNewEventName] = useState();
   const [NewEventDescription, SetNewEventDescription] = useState();
   const [Proposals, SetProposals] = useState([]);
   const [Coordinator, SetCoordinator] = useState();
-
-  // async function getEvents() {
-  //   const events =
-  //     contract && (await contract.queryFilter(contract.filters.NewProposal()));
-  //   const members =
-  //     contract && (await contract.queryFilter(contract.filters.MemberAdded()));
-  //   const start =
-  //     contract && (await contract.queryFilter(contract.filters.VoteStarts()));
-  //   const end =
-  //     contract && (await contract.queryFilter(contract.filters.VoteEnds()));
-
-  //   return events.map((e) => ({
-  //     groupId: e.args[0],
-  //     eventName: e.args[1],
-  //     members: members
-  //       .filter((m) => m.args[0].eq(e.args[0]))
-  //       .map((m) => m.args[1].toString()),
-  //     coordinator: e.args[2],
-  //     description: e.args[3],
-  //     start: start.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
-  //     end: end.filter((m) => m.args[0].eq(e.args[0])).map((m) => m.args[1]),
-  //   }));
-  // }
-
-  // useEffect(() => {
-  //   async function updateevents() {
-  //     const events = await getEvents();
-  //     Setevents(events);
-  //   }
-  //   updateevents();
-  // }, [contract]);
+  const contract = new ethers.Contract(
+    process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+    abi.abi,
+    signer
+  );
 
   const updateProposals = (value, index) => {
     let proposals = [...Proposals];
@@ -68,20 +44,20 @@ export default function GroupStep({
   };
 
   const CreateProposal = async () => {
-    let proposals = [...Proposals];
+    // let proposals = [...Proposals];
 
-    const newproposals = proposals.map((val, index) => {
-      if (val.length < 32) {
-        return ethers.utils.formatBytes32String(val);
-      }
-      return val;
-    });
-    SetProposals(newproposals);
-
+    // const newproposals = proposals.map((val, index) => {
+    //   if (val.length < 32) {
+    //     return ethers.utils.formatBytes32String(val);
+    //   }
+    //   return val;
+    // });
+    // SetProposals(newproposals);
+    console.log("Proposals", Proposals);
     await contract.NewVoteInstance(
       ethers.utils.formatBytes32String(NewEventName),
       NewEventDescription,
-      newproposals,
+      Proposals,
       Coordinator,
       20,
       0
@@ -116,7 +92,7 @@ export default function GroupStep({
               <div key={index} className="border-red-300 w-80">
                 <Input
                   className="p-2 mb-2 "
-                  placeholder="Enter proposal name"
+                  placeholder="Enter address"
                   value={proposal}
                   onChange={(e) => updateProposals(e.target.value, index)}
                 />

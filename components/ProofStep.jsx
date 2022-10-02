@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
+import { keccak256 } from "@ethersproject/solidity";
 const { Group } = require("@semaphore-protocol/group");
 import { Button, Input } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
@@ -78,6 +79,7 @@ export default function ProofStep({
         let z = await contract.getlatestVotes(
           ethers.BigNumber.from(eve[0].groupId).toString()
         );
+        console.log("Votes", z);
         SetVotes(z);
       }
     }
@@ -92,7 +94,7 @@ export default function ProofStep({
       Votes &&
         Votes.map((val, index) => {
           console.log("val", val);
-          a[index] = val.proposals;
+          a[index] = val.IndividualGrantee;
         });
       SetProposals(a);
       console.log("a", a);
@@ -120,17 +122,30 @@ export default function ProofStep({
     SetVoting(true);
     let b = [];
     for (let i = 0; i < proposals.length; i++) {
-      b[i] = ethers.utils.parseBytes32String(proposals[i]);
+      b[i] = proposals[i];
     }
 
     const mem = await getMembers();
     const group = new Group();
     group.addMembers(mem[0].members);
     let id = ethers.BigNumber.from(eve[0].groupId).toString();
-    const fullProof = await generateProof(identitycommitment, group, id, b[0], {
-      zkeyFilePath: "/semaphore.zkey",
-      wasmFilePath: "/semaphore.wasm",
-    });
+
+    console.log(
+      "Keccak256 of vote",
+      "b[0]",
+      b[0],
+      keccak256(["address"], [b[0]])
+    );
+    const fullProof = await generateProof(
+      identitycommitment,
+      group,
+      id,
+      keccak256(["address"], [b[0]]),
+      {
+        zkeyFilePath: "/semaphore.zkey",
+        wasmFilePath: "/semaphore.wasm",
+      }
+    );
     let ps = fullProof.publicSignals;
     let hash = ps.nullifierHash;
     const solidityProof = packToSolidityProof(fullProof.proof);
@@ -200,10 +215,11 @@ export default function ProofStep({
           <h3 className=" flex-col justify-center text-2xl bold w-80 m-2 p-2">
             {Votes &&
               Votes.map((val, index) => {
+                console.log("val proposals", val.IndividualGrantee);
                 return (
                   <div key={index}>
                     {" "}
-                    {ethers.utils.parseBytes32String(val.proposals)}:{" "}
+                    {val.IndividualGrantee}:{" "}
                     <div className="border-2 border-blue-500 ">
                       {
                         <Input
@@ -234,17 +250,15 @@ export default function ProofStep({
                 <ModalCloseButton />
                 <ModalBody>
                   {Votes &&
-                    (Votes.map < []) |
-                      (null >
-                        ((val, index) => {
-                          return (
-                            <div key={index}>
-                              {ethers.utils.parseBytes32String(val.proposals)}:{" "}
-                              {Position && Position[index] * Position[index]}{" "}
-                              <p>Votes</p>
-                            </div>
-                          );
-                        }))}
+                    Votes.map((val, index) => {
+                      return (
+                        <div key={index}>
+                          {val.IndividualGrantee}:{" "}
+                          {Position && Position[index] * Position[index]}{" "}
+                          <p>Votes</p>
+                        </div>
+                      );
+                    })}
                 </ModalBody>
 
                 <ModalFooter>
@@ -297,20 +311,6 @@ export default function ProofStep({
           {signer._address === Coordinator ? (
             <div className="bold text-2xl">
               <div className="">
-                {/* <LocalizationProvider dateAdapter={AdapterMoment}> */}
-                {/* <Stack spacing={3}> */}
-                {/* <DateTimePicker
-                    label="Date&Time picker"
-                    value={date}
-                    onChange={ e =>handleChange(e)}
-                    renderInput={(params) => <TextField {...params} />}
-                  /> */}
-                {/* </Stack> */}
-                {/* </LocalizationProvider> */}
-                {/* <DateTimePicker
-                  value = {date}
-                  onChange = {handleChange}
-                /> */}
                 <div>
                   <Datetime value={date} onChange={handleChange} />
                 </div>
@@ -341,7 +341,7 @@ export default function ProofStep({
                 return (
                   <div key={index} className="text-3xl ">
                     {" "}
-                    {ethers.utils.parseBytes32String(val.proposals)}:{" "}
+                    {val.IndividualGrantee}:{" "}
                     <b>{ethers.BigNumber.from(val.votes).toString()}</b> votes
                   </div>
                 );

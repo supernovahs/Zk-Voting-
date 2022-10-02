@@ -31,6 +31,16 @@ export default function Vote() {
     [signer]
   );
 
+  const readcontract = useMemo(
+    () =>
+      new ethers.Contract(
+        process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+        abi.abi,
+        provider
+      ),
+    [signer]
+  );
+
   const getEvents = useCallback(async () => {
     console.log("voteid", voteId);
     if (!voteId || !contract) {
