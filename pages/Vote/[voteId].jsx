@@ -15,6 +15,12 @@ export default function Vote() {
   const router = useRouter();
   const { voteId } = router.query;
 
+  const provider = useMemo(() => new ethers.providers.JsonRpcProvider(
+    process.env.NEXT_PUBLIC_MUMBAI_API
+  ), []);
+
+  console.log("provider", provider);
+  console.log("signer", signer);
   const contract = useMemo(
     () =>
       new ethers.Contract(
