@@ -140,7 +140,17 @@ export default function Activeproposals() {
               {/* <Text mb={2} fontSize={"l"}>
                 DESCRIPTION
               </Text> */}
-              <Textarea mb={5} value={des} contentEditable={false} />
+              <Box
+                width={"100%"}
+                height={"100px"}
+                borderRadius={10}
+                padding={3}
+                border={"1px solid rgba(255, 255, 255, 0.125)"}
+                mb={5}
+                overflow={"auto"}
+              >
+                {des}
+              </Box>
               <Box mb={5} display={"flex"}>
                 <Button disabled={true}>{a}</Button>
                 <Button ml={5}>

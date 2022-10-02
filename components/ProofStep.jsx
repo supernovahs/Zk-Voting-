@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import { keccak256 } from "@ethersproject/solidity";
 const { Group } = require("@semaphore-protocol/group");
-import { Button, Input } from "@chakra-ui/react";
+import { Box, Button, Divider, Heading, Input, Text } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
 import { useCallback } from "react";
 import Datetime from "react-datetime";
@@ -198,6 +198,190 @@ export default function ProofStep({
   const Unixtotime = (time) => {
     return new Date(time * 1000);
   };
+
+  return (
+    <>
+      <Box
+        backdropFilter={"blur(16px) saturate(180%)"}
+        backgroundColor={"rgba(17, 25, 40, 0.88)"}
+        borderRadius={20}
+        border={"1px solid rgba(255, 255, 255, 0.125)"}
+        padding={"2.5rem"}
+        margin={"auto"}
+        width={"70%"}
+        boxShadow={"0 10px 10px -5px rgba(156, 255, 0, 0.7)"}
+        mx={10}
+        my={10}
+        textAlign={"center"}
+      >
+        {eve == 0 ? (
+          <Box>
+            <Text>This Id does not exist</Text>
+          </Box>
+        ) : (
+          <Box>
+            {eve && (
+              <Heading mb={5} fontSize={"1.8rem"}>
+                ID: {ethers.BigNumber.from(eve[0].groupId).toString()}
+              </Heading>
+            )}
+            {Votes &&
+              Votes.map((val, index) => {
+                console.log("val proposals", val.IndividualGrantee);
+                return (
+                  <Box
+                    display={"flex"}
+                    justifyContent={"center"}
+                    alignItems={"center"}
+                    gap={5}
+                    my={3}
+                  >
+                    <Text fontSize={"1.5rem"}>{val.IndividualGrantee}: </Text>
+                    <Input
+                      width={"200px"}
+                      placeholder="Votes"
+                      value={Position[index]}
+                      onChange={(e) => updatePosition(index, e.target.value)}
+                    ></Input>
+                  </Box>
+                );
+                return (
+                  <div key={index}>
+                    {" "}
+                    {val.IndividualGrantee}:{" "}
+                    <div className="border-2 border-blue-500 ">
+                      {
+                        <Input
+                          placeholder="Votes"
+                          value={Position[index]}
+                          onChange={(e) =>
+                            updatePosition(index, e.target.value)
+                          }
+                        ></Input>
+                      }
+                    </div>
+                  </div>
+                );
+              })}
+            {
+              <Text mb={5} fontSize={"1.3rem"}>
+                Remaining Votes: {RemainingVotes}
+              </Text>
+            }
+            <Divider mb={5} />
+            <Box
+              display={"flex"}
+              alignItems={"center"}
+              justifyContent={"space-between"}
+            >
+              <Button width={"200px"} onClick={onOpen}>
+                Vote
+              </Button>
+              <Box
+                mr={5}
+                display={"flex"}
+                justifyContent={"center"}
+                alignItems={"center"}
+              >
+                {EventData && EventData[0] && EventData[0].time != 0 ? (
+                  <Text mr={20} fontSize={"xl"}>
+                    Start Time:{" "}
+                    {new Date(
+                      Number(EventData[0].time) * 1000
+                    ).toLocaleString()}{" "}
+                  </Text>
+                ) : (
+                  <Text mr={20} fontSize={"xl"}>
+                    <b>Start Time Status: </b>Not Started
+                  </Text>
+                )}
+
+                {EndTime != 0 ? (
+                  <Text fontSize={"xl"}>
+                    End Time: {new Date(EndTime * 1000).toLocaleString()}
+                  </Text>
+                ) : (
+                  <Text fontSize={"xl"}>
+                    <b>End Time Status: </b>Not Started
+                  </Text>
+                )}
+              </Box>
+            </Box>
+          </Box>
+        )}
+      </Box>
+      <Box
+        backdropFilter={"blur(16px) saturate(180%)"}
+        backgroundColor={"rgba(17, 25, 40, 0.88)"}
+        borderRadius={20}
+        border={"1px solid rgba(255, 255, 255, 0.125)"}
+        padding={"2.5rem"}
+        margin={"auto"}
+        width={"auto"}
+        boxShadow={"0 10px 10px -5px rgba(156, 255, 0, 0.7)"}
+        mx={10}
+        my={10}
+        textAlign={"center"}
+      >
+        <Heading mb={5}>Current Voting Situation</Heading>
+
+        {Votes &&
+          Votes.map((val, index) => {
+            return (
+              <Box key={index}>
+                <Text fontSize={"2xl"} mb={3}>
+                  {val.IndividualGrantee}:{" "}
+                  {ethers.BigNumber.from(val.votes).toString()} votes
+                </Text>
+              </Box>
+            );
+            return (
+              <div key={index} className="text-3xl ">
+                {" "}
+                {val.IndividualGrantee}:{" "}
+                <b>{ethers.BigNumber.from(val.votes).toString()}</b> votes
+              </div>
+            );
+          })}
+      </Box>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Confirm Your Vote</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {Votes &&
+              Votes.map((val, index) => {
+                return (
+                  <div key={index}>
+                    {val.IndividualGrantee}:{" "}
+                    {Position && Position[index] * Position[index]} <p>Votes</p>
+                  </div>
+                );
+              })}
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
+              Close
+            </Button>
+            <Button
+              variant="ghost"
+              isLoading={Voting}
+              onClick={async () => {
+                console.log("Positions ", Position);
+                console.log("Proposals", Proposals);
+                vote(Proposals, Position);
+              }}
+              disabled={NotEnoughVotes}
+            >
+              Vote
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
+  );
 
   return (
     <div>

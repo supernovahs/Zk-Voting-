@@ -139,7 +139,7 @@ export default function GroupStep({
         </Box>
         <Button
           justifySelf={"center"}
-          my={3}
+          mt={3}
           colorScheme="green"
           onClick={async () => {
             await CreateProposal();
