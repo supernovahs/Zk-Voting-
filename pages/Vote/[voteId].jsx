@@ -101,8 +101,8 @@ export default function Vote() {
     <Box
       display={"flex"}
       justifyContent={"center"}
-      alignItems={"center"}
-      flexDirection={"column"}
+      // alignItems={"center"}
+      flexDirection={"row"}
     >
       {signer && Events && contract && Identity && (
         <ProofStep
