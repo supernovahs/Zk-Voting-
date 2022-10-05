@@ -32,8 +32,6 @@ const wagmiClient = createClient({
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
-  localStorage.setItem("chakra-ui-color-mode", "dark");
-  localStorage.setItem("theme", "dark");
   return (
     <ChakraProvider>
       <WagmiConfig client={wagmiClient}>
