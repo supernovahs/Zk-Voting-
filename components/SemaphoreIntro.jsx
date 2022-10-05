@@ -28,6 +28,7 @@ export default function SemaphoreIntro() {
         </ul>
       </Text>
     </Box>
+
   );
 
  
