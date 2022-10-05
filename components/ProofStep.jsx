@@ -417,7 +417,7 @@ export default function ProofStep({
           </Table>
         </TableContainer>
       </Box>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal size={"2xl"} isCentered isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Confirm Your Vote</ModalHeader>
@@ -425,6 +425,13 @@ export default function ProofStep({
           <ModalBody>
             {Votes &&
               Votes.map((val, index) => {
+                return (
+                  <Text fontSize={"xl"}>
+                    {val.IndividualGrantee}:{" "}
+                    {Position[index] ? Position[index] * Position[index] : 0}{" "}
+                    Votes
+                  </Text>
+                );
                 return (
                   <div key={index}>
                     {val.IndividualGrantee}:{" "}
@@ -435,11 +442,13 @@ export default function ProofStep({
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
+            {/* <Button colorScheme="blue" mr={3} onClick={onClose}>
               Close
-            </Button>
+            </Button> */}
             <Button
-              variant="ghost"
+              colorScheme="teal"
+              width={"100%"}
+              // variant="ghost"
               isLoading={Voting}
               onClick={async () => {
                 console.log("Positions ", Position);
