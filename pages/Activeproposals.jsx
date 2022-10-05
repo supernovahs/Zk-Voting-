@@ -2,9 +2,19 @@ import React from "react";
 import abi from "../helpers/ZkVote.json";
 import { useState, useEffect } from "react";
 import { Identity } from "@semaphore-protocol/identity";
-import { Button, Input } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Heading,
+  Input,
+  Spinner,
+  Tag,
+  Text,
+  Textarea,
+} from "@chakra-ui/react";
 import Link from "next/link";
 import { useSigner } from "wagmi";
+import TextArea from "antd/lib/input/TextArea";
 const ethers = require("ethers");
 
 export default function Activeproposals() {
@@ -12,6 +22,7 @@ export default function Activeproposals() {
   const [Events, Setevents] = useState();
   const [NewVoter, SetNewVoter] = useState();
   const [_identity, _setidentity] = useState();
+  const [loading, setLoading] = useState(false);
   async function getEvents() {
     const provider = new ethers.providers.JsonRpcProvider(
       process.env.NEXT_PUBLIC_GOERLI_API
@@ -46,16 +57,39 @@ export default function Activeproposals() {
   }
 
   useEffect(() => {
+    setLoading(true);
     async function updateevents() {
       const events = await getEvents();
       console.log("events", events);
       Setevents(events);
     }
     updateevents();
+    setLoading(false);
   }, []);
 
+  if (!Events) {
+    return (
+      <Box
+        width={"100vw"}
+        height={"80vh"}
+        display={"flex"}
+        justifyContent={"center"}
+        alignItems={"center"}
+      >
+        <Spinner size={"xl"} />
+      </Box>
+    );
+  }
+
   return (
-    <div>
+    <Box
+      display={"flex"}
+      mx={"200px"}
+      my={20}
+      flexWrap={"wrap"}
+      justifyContent={"center"}
+      alignItems={"center"}
+    >
       {Events &&
         Events.map((value, i) => {
           let name = ethers.utils.parseBytes32String(value.eventName);
@@ -84,6 +118,79 @@ export default function Activeproposals() {
               ? (currentstatus = "Voting Ended")
               : (currentstatus = "Created");
           let a = isMember ? "You are a member" : "Not Member";
+
+          return (
+            <Box
+              border={"1px solid rgba(255, 255, 255, 0.125)"}
+              boxShadow={"0 10px 10px -5px rgba(156, 255, 0, 0.7)"}
+              padding={"2.5rem"}
+              borderRadius={20}
+              backgroundColor={"rgba(17, 25, 40, 0.88)"}
+              m={5}
+              width={"400px"}
+              // textAlign={"center"}
+            >
+              <Heading mb={5}>{name}</Heading>
+              <Text mb={3} fontSize={"xl"}>
+                ID: {id.substring(0, 18)}...
+              </Text>
+              <Text mb={5} fontSize={"xl"}>
+                Status: {status}...
+              </Text>
+              {/* <Text mb={2} fontSize={"l"}>
+                DESCRIPTION
+              </Text> */}
+              <Box
+                width={"100%"}
+                height={"100px"}
+                borderRadius={10}
+                padding={3}
+                border={"1px solid rgba(255, 255, 255, 0.125)"}
+                mb={5}
+                overflow={"auto"}
+              >
+                {des}
+              </Box>
+              <Box mb={5} display={"flex"}>
+                <Button disabled={true}>{a}</Button>
+                <Button ml={5}>
+                  <Link href={"Vote/" + id}>Open</Link>
+                </Button>
+              </Box>
+              {signer && signer._address == admin ? (
+                <Box>
+                  <Input
+                    placeholder="Add voter credentials"
+                    value={NewVoter}
+                    onChange={(e) => SetNewVoter(e.target.value)}
+                    mb={5}
+                  />
+                  <Button
+                    onClick={async () => {
+                      if (!signer) {
+                        alert("Please connect Wallet");
+                      }
+                      const contractwithsigner = new ethers.Contract(
+                        process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
+                        abi.abi,
+                        signer
+                      );
+                      const tx = await contractwithsigner.Addvoter(
+                        id,
+                        NewVoter
+                      );
+                      console.log("tx", tx);
+                    }}
+                  >
+                    Add Members
+                  </Button>
+                </Box>
+              ) : (
+                <Tag colorScheme={"red"}>You are not Admin</Tag>
+              )}
+            </Box>
+          );
+
           return (
             <div className="border-2 border-black p-2 m-2" key={id}>
               <p className="text-3xl font-bold">{name}</p>
@@ -128,6 +235,6 @@ export default function Activeproposals() {
             </div>
           );
         })}
-    </div>
+    </Box>
   );
 }

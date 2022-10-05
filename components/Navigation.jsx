@@ -1,15 +1,50 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { Box, Text } from "@chakra-ui/react";
 
 export default function Navigation() {
   const menus = [
-    { tabName: "Identity", pageName: "/" },
-    { tabName: "New Proposal", pageName: "/NewVote" },
-    { tabName: "Active Proposals", pageName: "/Activeproposals" },
-    { tabName: "Vote", pageName: "/SelectId" },
+    { tabName: "IDENTITY", pageName: "/" },
+    { tabName: "NEW PROPOSAL", pageName: "/NewVote" },
+    { tabName: "ACTIVE PROPOSAL", pageName: "/Activeproposals" },
+    { tabName: "VOTE", pageName: "/SelectId" },
   ];
-  const { pathName } = useRouter();
+  const { pathname } = useRouter();
+  console.log(pathname);
+
+  return (
+    <Box
+      display={"flex"}
+      background={"gray.800"}
+      justifyContent={"center"}
+      alignItems={"center"}
+      width={"min-content"}
+      borderRadius={"40px"}
+      paddingX={5}
+    >
+      {menus.map((tab) => (
+        <Link href={tab.pageName} key={tab.tabName}>
+          <Text
+            fontWeight={700}
+            paddingX={"2rem"}
+            paddingY={"1rem"}
+            width={"max-content"}
+            textAlign={"center"}
+            margin
+            _hover={{
+              color: "#9CFF00",
+              cursor: "pointer",
+              // fontSize: "1.1rem",
+            }}
+            color={pathname === tab.pageName ? "#9CFF00" : "white"}
+          >
+            {tab.tabName}
+          </Text>
+        </Link>
+      ))}
+    </Box>
+  );
 
   return (
     <>

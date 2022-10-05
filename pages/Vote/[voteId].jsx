@@ -6,6 +6,7 @@ import abi from "../../helpers/ZkVote.json";
 import { Identity } from "@semaphore-protocol/identity";
 import { useCallback } from "react";
 import { useMemo } from "react";
+import { Box } from "@chakra-ui/react";
 const { ethers } = require("ethers");
 
 export default function Vote() {
@@ -99,7 +100,12 @@ export default function Vote() {
   }, [getEvents]);
 
   return (
-    <div>
+    <Box
+      display={"flex"}
+      justifyContent={"center"}
+      // alignItems={"center"}
+      flexDirection={"row"}
+    >
       {signer && Events && contract && Identity && (
         <ProofStep
           signer={signer}
@@ -108,6 +114,6 @@ export default function Vote() {
           identitycommitment={_Identity}
         />
       )}
-    </div>
+    </Box>
   );
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useCallBack, useEffect } from "react";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Button, Input } from "@chakra-ui/react";
+import { Box, Button, Heading, Input } from "@chakra-ui/react";
 import AddressInput from "./EthComponents/AddressInput";
 import { useSigner } from "wagmi";
 import abi from "../helpers/ZkVote.json";
@@ -18,7 +18,7 @@ export default function GroupStep({
   const [Events, Setevents] = useState();
   const [NewEventName, SetNewEventName] = useState();
   const [NewEventDescription, SetNewEventDescription] = useState();
-  const [Proposals, SetProposals] = useState([]);
+  const [Proposals, SetProposals] = useState([""]);
   const [Coordinator, SetCoordinator] = useState();
   const contract = new ethers.Contract(
     process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
@@ -63,6 +63,93 @@ export default function GroupStep({
       0
     );
   };
+
+  return (
+    <Box
+      display={"flex"}
+      justifyContent={"center"}
+      alignItems={"center"}
+      my={"100px"}
+      textAlign={"center"}
+    >
+      <Box
+        backdropFilter={"blur(16px) saturate(180%)"}
+        backgroundColor={"rgba(17, 25, 40, 0.88)"}
+        borderRadius={20}
+        border={"1px solid rgba(255, 255, 255, 0.125)"}
+        padding={"2.5rem"}
+        width={"50%"}
+        margin={"auto"}
+        boxShadow={"0 10px 10px -5px rgba(156, 255, 0, 0.7)"}
+      >
+        <Heading borderBottom={"1px solid white"} pb={2} mb={5}>
+          Create a new vote
+        </Heading>
+        <Input
+          my={3}
+          placeholder="Enter Vote proposal Name"
+          value={NewEventName}
+          onChange={(e) => SetNewEventName(e.target.value)}
+        />
+        <Input
+          my={3}
+          placeholder="Enter Description of Voting "
+          value={NewEventDescription}
+          onChange={(e) => SetNewEventDescription(e.target.value)}
+        />
+        <Box my={3}>
+          {Proposals.map((proposal, index) => (
+            <Box my={3} key={index} display={"flex"}>
+              <Input
+                placeholder="Enter address"
+                value={proposal}
+                onChange={(e) => updateProposals(e.target.value, index)}
+                mb={3}
+              />
+              {index >= 0 && (
+                <Button
+                  ml={5}
+                  onClick={() => {
+                    RemoveProposals(index);
+                  }}
+                >
+                  <DeleteOutlined />
+                </Button>
+              )}
+              {index === Proposals.length - 1 && (
+                <Button
+                  ml={5}
+                  onClick={() => {
+                    AddProposals();
+                  }}
+                >
+                  <PlusOutlined />
+                </Button>
+              )}
+            </Box>
+          ))}
+        </Box>
+        <Box my={3}>
+          <AddressInput
+            placeholder="Coordinator"
+            value={Coordinator}
+            ensProvider={mainnetprovider}
+            onChange={(e) => SetCoordinator(e)}
+          />
+        </Box>
+        <Button
+          justifySelf={"center"}
+          mt={3}
+          colorScheme="green"
+          onClick={async () => {
+            await CreateProposal();
+          }}
+        >
+          Create Proposal
+        </Button>
+      </Box>
+    </Box>
+  );
 
   return (
     <div className="border-4 border-black  flex-col justify-center m-2 p-2  ">
