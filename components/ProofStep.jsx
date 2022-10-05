@@ -271,13 +271,19 @@ export default function ProofStep({
                           </Text>
                         </Tooltip>
                         <Input
-                          width={"200px"}
+                          width={"100px"}
                           placeholder="Votes"
                           value={Position[index]}
                           onChange={(e) =>
                             updatePosition(index, e.target.value)
                           }
                         ></Input>
+                        {" : "}
+                        <Text fontSize={"1.5rem"}>
+                          {isNaN(Position[index])
+                            ? "0"
+                            : Position[index] * Position[index]}{" "}
+                        </Text>
                       </Box>
                     );
                     return (
