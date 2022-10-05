@@ -5,8 +5,6 @@ import Identity from "./Identity";
 const Home: NextPage = () => {
   const [_identity, _Setidentity] = useState();
 
-  localStorage.setItem("chakra-ui-color-mode", "dark");
-  localStorage.setItem("theme", "dark");
   return (
     <>
       <div>
