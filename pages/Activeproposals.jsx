@@ -60,7 +60,6 @@ export default function Activeproposals() {
     setLoading(true);
     async function updateevents() {
       const events = await getEvents();
-      console.log("events", events);
       Setevents(events);
     }
     updateevents();
@@ -94,6 +93,7 @@ export default function Activeproposals() {
         Events.map((value, i) => {
           let name = ethers.utils.parseBytes32String(value.eventName);
           let id = ethers.BigNumber.from(value.groupId).toString();
+          console.log("id",id);
           let members = value.members;
           let isMember = false;
           let des = value.description;
@@ -175,11 +175,15 @@ export default function Activeproposals() {
                         abi.abi,
                         signer
                       );
-                      const tx = await contractwithsigner.Addvoter(
-                        id,
-                        NewVoter
-                      );
-                      console.log("tx", tx);
+                        let arr = [];
+                        console.log("newVoter",NewVoter);
+                        arr.push(NewVoter);
+                        console.log("arr",arr);
+                        const tx = await contractwithsigner.Addvoter(
+                          id,
+                          arr
+                        );
+                        console.log("tx", tx);
                     }}
                   >
                     Add Members
