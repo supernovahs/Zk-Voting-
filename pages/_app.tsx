@@ -8,7 +8,7 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import Layout from "../components/Layout";
 import { useEffect } from "react";
-import theme from "./theme";
+import theme from "../helpers/theme";
 
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.goerli],
