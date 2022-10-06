@@ -6,6 +6,8 @@ import {
   Box,
   Button,
   Divider,
+  Flex,
+  FormLabel,
   Heading,
   Input,
   Table,
@@ -204,6 +206,8 @@ export default function ProofStep({
     }
   };
   const handleChange = (newValue) => {
+    console.log(newValue);
+    console.log(Date.parse(new Date(newValue)));
     let time = (new Date(newValue).getTime() / 1000).toFixed(0);
     Setdate(time);
     console.log("Date", time);
@@ -309,34 +313,51 @@ export default function ProofStep({
                   </Text>
                 }
               </Box>
-              <Box pl={5}>
-                {EventData && EventData[0] && EventData[0].time != 0 ? (
-                  <Text fontSize={"xl"}>
-                    Start Time: <br />
-                    {new Date(
-                      Number(EventData[0].time) * 1000
-                    ).toDateString()}{" "}
-                    {new Date(
-                      Number(EventData[0].time) * 1000
-                    ).toLocaleTimeString()}
-                  </Text>
-                ) : (
-                  <Text fontSize={"xl"}>
-                    <b>Start Time Status: </b>Not Started
-                  </Text>
-                )}
+              {EventData && EventData[0] && EventData[0].time != 0 ? (
+                <Box pl={5}>
+                  {EventData && EventData[0] && EventData[0].time != 0 ? (
+                    <Text fontSize={"xl"}>
+                      Start Time: <br />
+                      {new Date(
+                        Number(EventData[0].time) * 1000
+                      ).toDateString()}{" "}
+                      {new Date(
+                        Number(EventData[0].time) * 1000
+                      ).toLocaleTimeString()}
+                    </Text>
+                  ) : (
+                    <Text fontSize={"xl"}>
+                      <b>Start Time Status: </b>Not Started
+                    </Text>
+                  )}
 
-                {EndTime != 0 ? (
-                  <Text mt={4} fontSize={"xl"}>
-                    End Time: <br /> {new Date(EndTime * 1000).toDateString()}{" "}
-                    {new Date(EndTime * 1000).toLocaleTimeString()}
-                  </Text>
-                ) : (
-                  <Text fontSize={"xl"}>
-                    <b>End Time Status: </b>Not Started
-                  </Text>
-                )}
-              </Box>
+                  {EndTime != 0 ? (
+                    <Text mt={4} fontSize={"xl"}>
+                      End Time: <br /> {new Date(EndTime * 1000).toDateString()}{" "}
+                      {new Date(EndTime * 1000).toLocaleTimeString()}
+                    </Text>
+                  ) : (
+                    <Text fontSize={"xl"}>
+                      <b>End Time Status : </b>Not Started
+                    </Text>
+                  )}
+                </Box>
+              ) : (
+                <Box pl={5}>
+                  <FormLabel>End Time</FormLabel>
+                  <Input
+                    type={"datetime-local"}
+                    onChange={(e) => {
+                      const x = new Date(e.target.value);
+                      console.log(Date.parse(x));
+                    }}
+                  />
+                  <Flex mt={5}>
+                    <Button colorScheme={"teal"}>Start Poll</Button>
+                    <Button ml={5}>Disperse</Button>
+                  </Flex>
+                </Box>
+              )}
             </Box>
             <Divider mb={5} />
             <Box
