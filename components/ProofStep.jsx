@@ -20,7 +20,6 @@ import {
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
 import { useCallback } from "react";
-import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 
 import {
