@@ -8,6 +8,7 @@ import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import Layout from "../components/Layout";
 import { useEffect } from "react";
+import theme from "./theme";
 
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.goerli],
@@ -33,13 +34,8 @@ const wagmiClient = createClient({
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
-  useEffect(() => {
-    localStorage.setItem("chakra-ui-color-mode", "dark");
-    localStorage.setItem("theme", "dark");
-  }, []);
-
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <WagmiConfig client={wagmiClient}>
         <RainbowKitProvider chains={chains}>
           <Layout>
