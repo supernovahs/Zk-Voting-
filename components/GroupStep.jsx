@@ -16,6 +16,7 @@ export default function GroupStep({
   const [NewEventDescription, SetNewEventDescription] = useState();
   const [Proposals, SetProposals] = useState([""]);
   const [Coordinator, SetCoordinator] = useState();
+  const [Fund,SetFund] = useState(0);
   const contract = new ethers.Contract(
     process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
     abi.abi,
@@ -56,12 +57,13 @@ export default function GroupStep({
       Proposals,
       Coordinator,
       20,
-      0
+      0,{value: (Fund ? ethers.utils.parseEther(Fund ).toString() : 0) }
     );
     SetCoordinator("");
     SetNewEventDescription("");
     SetNewEventName("");
     SetProposals("");
+    SetFund("");
   };
 
   return (
@@ -135,6 +137,13 @@ export default function GroupStep({
             value={Coordinator}
             ensProvider={mainnetprovider}
             onChange={(e) => SetCoordinator(e)}
+          />
+        </Box>
+        <Box my={3}>
+          <Input
+            placeholder="Ether to distribute"
+            value= {Fund}
+            onChange={e=> SetFund(e.target.value)}
           />
         </Box>
         <Button

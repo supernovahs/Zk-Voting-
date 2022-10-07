@@ -57,6 +57,8 @@ export default function ProofStep({
   const [Id, SetId] = useState();
   const [UpdateVotes, SetUpdateVotes] = useState(false);
   const [EndTime, SetEndTime] = useState();
+  const [Time,SetTime] = useState();
+
   let BACKEND_URL = "https://zkvotebackend.herokuapp.com/";
 
   const getEvents = useCallback(async () => {
@@ -90,6 +92,7 @@ export default function ProofStep({
         const coordinator = pollInstance.coordinator;
         SetCoordinator(coordinator);
         const endtime = pollInstance.endtime;
+        console.log("endtime",ethers.BigNumber.from(endtime).toString());
         SetEndTime(ethers.BigNumber.from(endtime).toString());
         SetId(ethers.BigNumber.from(eve[0].groupId).toString());
         let z = await contract.getlatestVotes(
@@ -336,6 +339,7 @@ export default function ProofStep({
                       End Time: <br /> {new Date(EndTime * 1000).toDateString()}{" "}
                       {new Date(EndTime * 1000).toLocaleTimeString()}
                     </Text>
+                    
                   ) : (
                     <Text fontSize={"xl"}>
                       <b>End Time Status : </b>Not Started
@@ -349,16 +353,31 @@ export default function ProofStep({
                     type={"datetime-local"}
                     onChange={(e) => {
                       const x = new Date(e.target.value);
-                      console.log(Date.parse(x));
+                      console.log("New time",Date.parse(x).toString().substring(0,10));
+                      SetTime(Date.parse(x).toString().substring(0,10));
                     }}
                   />
                   <Flex mt={5}>
-                    <Button colorScheme={"teal"}>Start Poll</Button>
-                    <Button ml={5}>Disperse</Button>
+                    <Button colorScheme={"teal"}
+                     onClick={async () => {
+                      console.log("id",ethers.BigNumber.from(eve[0].groupId).toString());
+                      console.log("Time",Time);
+                      await contract.StartPoll(
+                        ethers.BigNumber.from(eve[0].groupId).toString(),
+                         Time
+                      );
+                    }}
+                    >Start Poll</Button>
+                    
                   </Flex>
                 </Box>
               )}
             </Box>
+            <Button ml={5}
+              onClick= {async()=>{
+                await contract.disperse(ethers.BigNumber.from(eve[0].groupId).toString())
+              }}
+            >Disperse</Button>
             <Divider mb={5} />
             <Box
               display={"flex"}
